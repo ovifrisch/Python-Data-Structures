@@ -1,4 +1,4 @@
-
+import random
 class BST:
 
     class Node:
@@ -11,6 +11,27 @@ class BST:
         self.root = None
         self.size = 0
         self.init_tree(data)
+
+    def find_min(self, node):
+        while (node.left):
+            node = node.left
+        return node
+
+    def is_valid(self):
+
+        def inorder(root):
+            if (not root):
+                return True
+            if (not inorder(root.left)):
+                return False
+            if (self.prev is not None and root.val < self.prev):
+                return False
+
+            self.prev = root.val
+            return inorder(root.right)
+
+        self.prev = None
+        return inorder(self.root)
 
     def __repr__(self):
         if (not self.root):
@@ -84,62 +105,53 @@ class BST:
     def remove(self, val):
 
 
-        def helper(node):
-            # node.val is guaranteed not be equal to val
+        def helper(node, target):
+            # the target was not found
+            if (not node):
+                raise Exception("Value not found")
 
-            # val not found
-            if (not node.left and not node.right):
-                return
-
-            if (node.left and val == node.left.val):
-                if (not node.left.left):
-                    node.left = node.left.right
-                elif (not node.left.right):
-                    node.left = node.left.left
+            # the target has been found
+            if (node.val == target):
+                if (not node.left and not node.right):
+                    return None
+                elif (node.left):
+                    return node.left
+                elif (node.right):
+                    return node.right
                 else:
-                    curr = node.left
-                    while (curr.right.right):
-                        curr = curr.right
-                    node.left.val = curr.right.val
-                    curr.right = None
-                self.size -= 1
+                    # find the inorder successor of the current node
+                    node.val = self.find_min(node.right)
+                    node.right = helper(node.right, node.val)
+                    return node
 
-            elif (node.right and val == node.right.val):
-                if (not node.right.left):
-                    node.right = node.right.right
-                elif (not node.right.right):
-                    node.right = node.right.left
-                else:
-                    curr = node.left
-                    while (curr.right.right):
-                        curr = curr.right
-                    node.right.val = curr.right.val
-                    curr.right = None
-                self.size += 1
+            elif (target < node.val):
+                node.left = helper(node.left, target)
+            else:
+                node.right = helper(node.right, target)
+            return node
 
-            # val 
-            if (node.left and val < node.left.val):
-                return helper(node.left)
-            elif (node.right and val > node.right.val):
-                return helper(node.right)
-            elif (node.left and val > node.left.val):
-                return helper(node.left)
-            elif (node.right and val < node.right.val):
-                return helper(node.right)
-
-
-
-        if (not self.root or self.root.val == val):
-            dummy = self.Node(-1, self.root, None)
-            helper(dummy)
-            self.root = dummy.left
-        else:
-            helper(self.root)
+        self.root = helper(self.root, val)
+        self.size -= 1
 
 
 
 
 if __name__ == "__main__":
-    t = BST([5, 3, 7, 2, None, None, 10])
+    t = BST()
+    nums = set()
+    for i in range(5):
+        nums.add(random.randint(1, 100))
+    nums = list(nums)
+    print(nums)
+
+    for num in nums:
+        t.insert(num)
+        print(t.is_valid())
+
+    for num in nums[::-1]:
+        t.remove(num)
+        print(t)
+        print(t.is_valid())
+    print(t)
     
 
