@@ -61,17 +61,29 @@ class AVL:
 	def balance(self, root):
 		if (not root):
 			return root
+
+		# left child larger height than right child
 		if (self.height(root.left) - self.height(root.right) > self.max_diff):
+
+			# left left
 			if (self.height(root.left.left) > self.height(root.left.right)):
 				root = self.rotateWithLeft(root)
+
+			# left right
 			else:
 				root = self.doubleRotateWithLeft(root)
+
+		# right child larger height than left child
 		elif (self.height(root.right) - self.height(root.left) > self.max_diff):
+
+			# right right
 			if (self.height(root.right.right) > self.height(root.right.left)):
 				root = self.rotateWithRight(root)
+
+			# right left
 			else:
 				root = self.doubleRotateWithRight(root)
-
+				
 		root.height = 1 + max(self.height(root.left), self.height(root.right))
 		return root
 
@@ -114,14 +126,9 @@ class AVL:
 					root.right = helper(root.right, root.val)
 				else:
 					if (root.left):
-						temp = root.left
-						return temp
+						return = root.left
 					else:
-						temp = root.right
-						return temp
-
-
-
+						return root.right
 			return self.balance(root)
 
 		self.root = helper(self.root, val)

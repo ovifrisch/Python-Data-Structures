@@ -1,6 +1,4 @@
-skiplist
 btree
-avl
 splay
 red black
 kd
