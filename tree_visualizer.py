@@ -1,6 +1,14 @@
 
 # return a (multiline) string that shows the tree like this for example:
 
+"""
+        1
+     *     *
+    2       3
+  *   *   *   *
+ 1     7 2     1
+"""
+
 class Node:
 	def __init__(self, val, nxt=None):
 		self.val = val

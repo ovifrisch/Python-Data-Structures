@@ -68,7 +68,6 @@ class BST:
         def helper(node):
             if (not node):
                 return False
-
             elif (node.val == val):
                 return True
             elif (val < node.val):
@@ -78,29 +77,23 @@ class BST:
 
         return self.helper(self.root)
 
-    def insert(self, val):
-        
-        def helper(node):
 
-            if (val < node.val):
-                if (node.left):
-                    helper(node.left)
-                else:
-                    node.left = self.Node(val)
-                    self.size += 1
-            elif (val > node.val):
-                if (node.right):
-                    helper(node.right)
-                else:
-                    node.right = self.Node(val)
-                    self.size += 1
+    def insert(self, val):
+
+        def helper(root, val):
+            if (not root):
+                return self.Node(val)
+            elif (val < root.val):
+                root.left = helper(root.left, val)
+            elif (val > root.val):
+                root.right = helper(root.right, val)
             else:
                 raise Exception("Value already exists")
 
-        if (not self.root):
-            self.root = self.Node(val)
-        else:
-            helper(self.root)
+            return root
+
+        self.root = helper(self.root, val)
+        self.size += 1
 
     def remove(self, val):
 
@@ -132,8 +125,6 @@ class BST:
 
         self.root = helper(self.root, val)
         self.size -= 1
-
-
 
 
 if __name__ == "__main__":
