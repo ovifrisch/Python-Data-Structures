@@ -1,14 +1,15 @@
-
+import copy
+import math
 
 class ProbingHash:
 
 	def __init__(self, probing_function):
 		# make sure the table size is always prime
-		self.array = [None] * 101
+		self.array = [None] * 3
 		self.size = 0
 		self.probing_function = probing_function
 
-	def next_prime(N):
+	def next_prime(self, N):
 		curr = N + 1
 		next_prime = None
 		while (not next_prime):
@@ -26,7 +27,7 @@ class ProbingHash:
 	x is the str reperesentation of the key
 	Return value is the hashed value using sum_chars(x) % table_size
 	"""
-	def __hash(self, x):
+	def __hash(self, key):
 		
 		def sum_chars(s):
 			res = 0
@@ -34,7 +35,7 @@ class ProbingHash:
 				res += ord(c)
 			return res
 
-		return sum_chars(x) % len(self.array)
+		return sum_chars(key) % len(self.array)
 
 	"""
 	probe the array using probing_function until cell with key is found or None found
@@ -47,6 +48,8 @@ class ProbingHash:
 		curr_idx = hashed_key
 		num_probes = 0
 		while (1):
+			# continue with probing if there's an entry here that doesn't match our key
+			# else go inside this block
 			if (self.array[curr_idx] is None or self.array[curr_idx]['key'] == key):
 				if (val is not None):
 					self.array[curr_idx] = {'key':key, 'val':val}
@@ -77,8 +80,10 @@ class ProbingHash:
 	Set the new size to be the next prime after 2 times the old size
 	"""
 	def __rehash(self):
-		old_array = self.array
+		print("rehashing")
+		old_array = copy.deepcopy(self.array)
 		self.array = [None] * self.next_prime(len(self.array) * 2)
+		self.size = 0
 
 		for item in old_array:
 			if (item is None):

@@ -9,4 +9,4 @@ class LinearProbingHash(ProbingHash):
 if __name__ == "__main__":
 	h = LinearProbingHash()
 	h[0] = 1
-	print(h.contains(1))
+	h[1] = 2

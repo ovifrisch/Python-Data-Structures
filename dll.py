@@ -6,6 +6,13 @@ class Node:
       self.next = next
       self.prev = prev
 
+   def __iadd__(self, num):
+      curr = self
+      while (num > 0):
+         num -= 1
+         curr = curr.next
+      return curr
+
 class DLL:
    def __init__(self, nodes=None):
       if (nodes):
@@ -21,11 +28,40 @@ class DLL:
       for i in range(len(nodes) - 1):
          x.next = nodes[i+1]
          x.next.prev = x
-         x = x.next
+         x += 1
       self.tail = x
       self.size = len(nodes)
 
-   def insert_front(self, node):
+   """
+   remove the first node that satisfies the predicate p
+   """
+   def remove_if(self, p):
+      curr = self.head
+      while (curr):
+         if (p(curr.val)):
+            self.remove(curr.val)
+            break
+         curr += 1
+
+   def remove(self, data):
+      if (not self.head):
+         raise Exception("Value not found")
+      elif (self.head.val == data):
+         self.pop_front()
+      elif (self.tail.val == data):
+         self.pop_back()
+      else:
+         curr = self.head
+         while (curr.next):
+            if (curr.next.val == data):
+               curr.next = curr.next.next
+               curr.next.prev = curr
+               return
+            curr += 1
+         raise Exception("Value not found")
+
+   def insert_front(self, data):
+      node = Node(data)
       temp = self.head
       self.head = node
       self.head.next = temp
@@ -33,13 +69,14 @@ class DLL:
          self.tail = self.head
       self.size += 1
 
-   def insert_back(self, node):
+   def insert_back(self, data):
+      node = Node(data)
       if (not self.head):
          self.head = self.tail = node
       else:
          node.prev = self.tail
          self.tail.next = node
-         self.tail = self.tail.next
+         self.tail += 1
       self.size += 1
 
    def pop_front(self):
@@ -47,7 +84,7 @@ class DLL:
          raise Exception("deleting from empty list!")
       else:
          x = self.head.val
-         self.head = self.head.next
+         self.head += 1
          if (not self.head):
             self.tail = None
          self.size -= 1
@@ -70,7 +107,7 @@ class DLL:
       while (curr):
          if (curr.val == data):
             return True
-         curr = curr.next
+         curr += 1
       return False
 
    def __len__(self):
@@ -81,12 +118,29 @@ class DLL:
       curr = self.head
       while (curr):
          res += str(curr.val) + ","
-         curr = curr.next
+         curr += 1
       
       if (res[-1] == ","):
          res = res[:-1]
       res += "]"
       return res
+
+   def __iadd__(self, num):
+      while (num > 0):
+         num -= 1
+
+
+   def __iter__(self):
+      self.start_iter = self.head
+      return self
+
+   def __next__(self):
+      if (not self.start_iter):
+         raise StopIteration
+      else:
+         val = self.start_iter.val
+         self.start_iter += 1
+         return val
          
 
 
@@ -95,4 +149,4 @@ if __name__ == "__main__":
    for i in range(10):
       nodes.append(Node(i))
    ll = DLL(nodes)
-   print(ll)
+
