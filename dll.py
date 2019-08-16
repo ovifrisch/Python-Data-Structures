@@ -87,20 +87,23 @@ class DLL:
          self.head += 1
          if (not self.head):
             self.tail = None
+         else:
+            self.head.prev = None
          self.size -= 1
          return x
 
    def pop_back(self):
       if (not self.head):
          raise Exception("deleting from empty list!")
+
+      x = self.tail.val
+      if (not self.tail.prev):
+         self.head = self.tail = None
       else:
-         x = self.tail.val
          self.tail = self.tail.prev
          self.tail.next = None
-         if (not self.tail):
-            self.head = None
-         self.size -= 1
-         return x
+      self.size -= 1
+      return x
 
    def contains(self, data):
       curr = self.head
@@ -124,10 +127,6 @@ class DLL:
          res = res[:-1]
       res += "]"
       return res
-
-   def __iadd__(self, num):
-      while (num > 0):
-         num -= 1
 
 
    def __iter__(self):
