@@ -126,7 +126,7 @@ class AVL:
 					root.right = helper(root.right, root.val)
 				else:
 					if (root.left):
-						return = root.left
+						return root.left
 					else:
 						return root.right
 			return self.balance(root)
@@ -148,6 +148,10 @@ class AVL:
 
 		return helper(self.root, val)
 
+
+	"""
+	level order traversal
+	"""
 	def __repr__(self):
 		if (not self.root):
 			return "[]"

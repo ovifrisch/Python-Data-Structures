@@ -1,5 +1,4 @@
 btree
-splay
 red black
 kd
 treap
