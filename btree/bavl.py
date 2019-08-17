@@ -44,15 +44,19 @@ class BAVL(AVL):
 				return
 
 			helper(root.left)
-
+			if (found_q and found_p):
+				return
 			if (q(root.val)):
 				if (not found_p):
 					pre = [root.val]
 				else:
 					post.append(root.val)
+					found_q = True
 					return
 
 			elif (p(root.val)):
+				pre.append(root.val)
+				post.append(root.val)
 				found_p = True
 
 			else:
@@ -67,6 +71,7 @@ class BAVL(AVL):
 		if (not found_q):
 			return pre
 		return pre if len(pre) > len(post) else post
+
 
 
 	"""
@@ -97,6 +102,7 @@ class BAVL(AVL):
 			node = node.left
 		val = node.val
 		self.remove(val)
+		return val
 
 	def remove_max(self):
 		if (not self.root):
@@ -118,12 +124,22 @@ class BAVL(AVL):
 			node = node.left
 		return node.val
 
+	def get_max(self):
+		if (not self.root):
+			raise Exception("Get min not defined on empty tree")
+
+		node = self.root
+		while (node.right):
+			node = node.right
+		return node.val
+
 
 
 if __name__ == "__main__":
 	t = BAVL([1, 2, 3, 4, 5, 6])
-	p = lambda x: x == 6
-	q = lambda x: x == 4
+	print(t)
+	p = lambda x: x == 1
+	q = lambda x: x == 2
 	vals = t.get_optimal_adoption(p, q)
 	print(vals)
 

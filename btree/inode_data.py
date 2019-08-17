@@ -24,6 +24,3 @@ class INodeData:
 
 	def __gt__(self, other):
 		return self.key > other.key
-
-	def __repr__(self):
-		return str(self.key)

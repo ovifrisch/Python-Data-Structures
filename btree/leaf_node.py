@@ -1,4 +1,4 @@
-from internal_node import InternalNode
+import internal_node
 from node import Node
 from inode_data import INodeData
 
@@ -18,9 +18,6 @@ class LeafNode(Node):
 		# for now assume we are just storing integers, so
 		# the key can be the data
 		return data
-
-	def get_min(self):
-		return self.vals.get_min()
 
 
 	def create_leaf(self, vals):
@@ -52,12 +49,12 @@ class LeafNode(Node):
 		split = len(inorder_vals) // 2
 		leaf1 = self.create_leaf(inorder_vals[:split])
 		leaf2 = self.create_leaf(inorder_vals[split:])
-		parent_data = INodeData(self.get_key(leaf2.get_min()), leaf2)
-		parent = InternalNode(self.internal_node_capacity, [parent_data], leaf1)
+		parent_left = INodeData(-float('inf'), leaf1)
+		parent_right = INodeData(self.get_key(leaf2.vals.get_min()), leaf2)
+		parent = internal_node.InternalNode(self.internal_node_capacity, self.capacity, [parent_left, parent_right])
 		leaf1.parent = parent
 		leaf2.parent = parent
 		return parent
-
 
 
 
@@ -66,13 +63,7 @@ class LeafNode(Node):
 
 	def remove(self, key, data):
 		if (not self.vals.contains(data)):
-			return False
+			raise Exception("Value {} does not exist".format(data))
+		self.vals.remove(data)
+		return self
 
-		# no parent so simply remove here and return
-		if (not self.parent):
-			self.vals.remove(data)
-			return self
-
-		# leaf has parent
-		## IMPLEMENT!!
-		print("hey!")

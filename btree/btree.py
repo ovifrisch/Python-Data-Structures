@@ -1,7 +1,9 @@
 from bavl import BAVL
-from leaf_node import LeafNode
+import leaf_node
+import internal_node
 import math
 from inode_data import INodeData
+import random
 
 
 class BTree:
@@ -9,7 +11,7 @@ class BTree:
 		self.size = 0
 		self.L = leaf_capacity
 		self.M = internal_node_capacity
-		self.root = LeafNode(self.L, self.M) # initial btree contains a single leafnode & no parent
+		self.root = leaf_node.LeafNode(self.L, self.M) # initial btree contains a single leafnode & no parent
 
 	"""
 	we could be storing complex objects in here
@@ -29,8 +31,6 @@ class BTree:
 	def remove(self, data):
 		key = self.get_key(data)
 		self.root = self.root.remove(key, data)
-		if (not self.root):
-			raise Exception("Value {} does not exist".format(data))
 		self.size -= 1
 
 	def contains(self, data):
@@ -40,17 +40,73 @@ class BTree:
 	def __len__(self):
 		return self.size
 
+	"""
+	level order travsersal
+	"""
 	def __repr__(self):
-		return ""
+		q = [self.root]
+		res = ""
+		prev = -float('inf')
+		while (q):
+			node = q.pop(0)
+			if (len(node) == 0):
+				res += str([])
+			elif (isinstance(node, leaf_node.LeafNode)):
+				if (len(node) > 0 and node.vals.get_min() < prev):
+					res += "\n"
+				prev = node.vals.get_max()
+				res += str(node.vals.inorder()) + ",   "
+			else:
+				the_min = node.vals.get_max().key
+				if (the_min < prev):
+					res += "\n"
+				prev = the_min
+				res += str([x.key for x in node.vals.inorder()]) + ",   "
+				inorder = node.vals.inorder()
+				for inode in inorder:
+					q.append(inode.child)
+		return res
 
 
 if __name__ == "__main__":
-	t = BTree(5, 5)
-	for i in range(9):
+	t = BTree(leaf_capacity=3, internal_node_capacity=3)
+	for i in range(15):
 		t.insert(i)
 
-	for i in range(9):
-		print(t.contains(i))
+	for i in range(14, -1, -1):
+		print("removing {}...".format(i))
+		t.remove(i)
+		print(t)
+
+	# print(t)
+	# t.remove(0)
+	# print(t)
+	# t.remove(1)
+	# print(t)
+	# t.remove(2)
+	# print(t)
+	# t.remove(3)
+	# print(t)
+	# t.remove(4)
+	# print(t)
+	# t.remove(5)
+	# print(t)
+	# t.remove(6)
+	# print(t)
+
+	# pool = list(range(1000))
+	# nums = []
+	# while (pool):
+	# 	nums.append(pool.pop(random.randint(0, len(pool) - 1)))
+	# for num in nums:
+	# 	t.insert(num)
+
+	# for num in nums:
+	# 	if (not t.contains(num)):
+	# 		print("fuck")
+
+	# print("yay :)")
+
 
 
 
