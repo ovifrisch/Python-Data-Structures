@@ -22,6 +22,12 @@ class InternalNode(Node):
 			return self.get_min_leaf(child.vals.get_min())
 		return child.vals.get_min()
 
+	def is_underflow(self):
+		return len(self) < 2
+
+	def can_provide(self):
+		return len(self) > 2
+
 
 	"""
 	path : List(INodeData)
@@ -49,10 +55,11 @@ class InternalNode(Node):
 
 
 			next_child = path[i+1].child
-			min_ = next_child.vals.remove_min()
-			if (isinstance(min_, INodeData)):
-				min_.key = self.get_min_leaf(min_)
-			next_child.vals.insert(min_)
+			if (len(next_child) > 0):
+				min_ = next_child.vals.remove_min()
+				if (isinstance(min_, INodeData)):
+					min_.key = self.get_min_leaf(min_)
+				next_child.vals.insert(min_)
 			next_child.vals.insert(max_)
 
 
@@ -76,6 +83,7 @@ class InternalNode(Node):
 			min_ = child.vals.remove_min()
 			if (isinstance(min_, INodeData)):
 				min_.key = self.get_min_leaf(min_)
+
 
 
 			min2 = child.vals.remove_min()
@@ -110,9 +118,23 @@ class InternalNode(Node):
 
 		return True
 
-	"""
+	def inverse_adopt(self, key):
+		p = lambda x: x.child.is_underflow()
+		q = lambda x: x.child.can_provide()
 
-	"""
+		path = self.vals.get_optimal_adoption(p, q)
+		# can't adopt
+		if (len(path) <= 1):
+			return False
+		if (key == path[0].key):
+			self.adopt_left(path)
+
+		else:
+			self.adopt_right(path)
+
+		return True
+
+
 	def split(self, node):
 		inorder_vals = node.vals.inorder()
 		split = len(inorder_vals) // 2
@@ -202,53 +224,41 @@ class InternalNode(Node):
 		"""
 		length of the inode's child is greater than zero
 		"""
-		if (isinstance(child, leaf_node.LeafNode) and len(child) > 0):
-			min_leaf = self.get_min_leaf(inode)
-			if (min_leaf > inode.key and inode.key != -float('inf')):
-				inode.key = min_leaf
+		if (not child.is_underflow()):
+			if (inode.key != -float('inf')):
+				inode.key = self.get_min_leaf(inode)
 			return self
 
-		elif (isinstance(child, InternalNode) and len(child) > 1):
-			min_leaf = self.get_min_leaf(inode)
-			if (min_leaf > inode.key and inode.key != -float('inf')):
-				inode.key = min_leaf
+		# try adopting
+		if (self.inverse_adopt(inode.key)):
 			return self
 
+		# failed adoption
+
+		# if the child is an internal node, set the child to the child of the inode
+		if (isinstance(child, InternalNode)):
+			if (inode.key != -float('inf')):
+				new_key = self.get_min_leaf(inode)
+				inode.key = new_key
+
+			inode.child = inode.child.vals.get_min().child
+			inode.child.parent = self
+
+		# otherwise just remove the inode and update the minimum inode's key
 		else:
-			if (isinstance(child, InternalNode)):
-				if (inode.key != -float('inf')):
-					new_key = self.get_min_leaf(inode)
-					inode.key = new_key
-				inode.child = inode.child.vals.get_min().child
-			else:
-				self.vals.remove(inode)
-				min_ = self.vals.remove_min()
-				min_.key = -float('inf')
-				self.vals.insert(min_)
+			self.vals.remove(inode)
+			min_ = self.vals.remove_min()
+			min_.key = -float('inf')
+			self.vals.insert(min_)
 
 
-		if (not self.parent):
-			if (len(self) > 1):
-				return self
-			return self.vals.remove_min().child
+		# no parent and we are underflowing
+		if (not self.parent and len(self) == 1):
+			parent = self.vals.remove_min().child
+			parent.parent = None
+			return parent
 
 		return self
-
-		# """
-		# length of the inode's child is equal to zero
-		# need to delete it
-		# """
-		# self.vals.remove(inode.key)
-
-		# # now the parent would check if this node has zero children and proceed to
-		# # delete it until we reach the root. but if this is the root, and we have gone
-		# # to 0, we set the new root 
-
-		# if (not parent):
-			
-
-
-
 
 
 

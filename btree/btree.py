@@ -69,48 +69,24 @@ class BTree:
 
 
 if __name__ == "__main__":
-	t = BTree(leaf_capacity=3, internal_node_capacity=3)
-	for i in range(15):
-		t.insert(i)
+	t = BTree(leaf_capacity=100, internal_node_capacity=100)
+	pool = list(range(1000))
+	nums = []
+	while (pool):
+		nums.append(pool.pop(random.randint(0, len(pool) - 1)))
+	for num in nums:
+		t.insert(num)
 
-	for i in range(14, -1, -1):
-		print("removing {}...".format(i))
-		t.remove(i)
-		print(t)
+	for num in nums:
+		if (not t.contains(num)):
+			print(":(")
+	
+	for num in nums:
+		t.remove(num)
 
-	# print(t)
-	# t.remove(0)
-	# print(t)
-	# t.remove(1)
-	# print(t)
-	# t.remove(2)
-	# print(t)
-	# t.remove(3)
-	# print(t)
-	# t.remove(4)
-	# print(t)
-	# t.remove(5)
-	# print(t)
-	# t.remove(6)
-	# print(t)
-
-	# pool = list(range(1000))
-	# nums = []
-	# while (pool):
-	# 	nums.append(pool.pop(random.randint(0, len(pool) - 1)))
-	# for num in nums:
-	# 	t.insert(num)
-
-	# for num in nums:
-	# 	if (not t.contains(num)):
-	# 		print("fuck")
-
-	# print("yay :)")
-
-
-
-
-
+	for num in nums:
+		if (t.contains(num)):
+			print(":(")
 
 
 

@@ -19,6 +19,12 @@ class LeafNode(Node):
 		# the key can be the data
 		return data
 
+	def is_underflow(self):
+		return len(self) <= 0
+
+	def can_provide(self):
+		return len(self) > 1
+
 
 	def create_leaf(self, vals):
 		return LeafNode(self.capacity, self.internal_node_capacity, vals)
