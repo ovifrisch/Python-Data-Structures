@@ -1,0 +1,38 @@
+"""
+I thought it was smart to implement a BTree using
+AVL trees as the structures that store leaves
+and internal keys. The idea was that it would
+improve the running time from linear to logarithmic
+beacuse you wouldn't have to do a linear search
+to find the key or data you're looking for.
+
+
+Then after implementing the basic structure
+of the BTree, I realized that this was quite
+a stupid idea. The whole purpose of a BTree is
+to reduce the number of disk reads and writes,
+because they are expensive and in a real life scenario,
+that's where our data lives. By wrapping leaves
+and internal nodes inside an AVL object, you increase
+the space required to store them compared to using a
+simple array. As a result, you are able to store less in
+each block, which means you can store less
+in a single leaf, which means you are going to
+have more internal nodes, which will also take up
+more space which will reduce the amount of keys stored
+in an internal node, which reduces the branching factor
+of the tree. All this simply means the tree has a larger
+depth which means that you are going to make more
+disk accesses. And since disk access time is the real
+bottleneck of any BTree implementation, a slight performance
+boost in searching through keys and values not only
+fails to improve the performance of the BTree, it
+significantly makes it worse.
+
+
+Just for fun though, I will implement both versions
+and then compare the results.
+
+Actually, what if we could serialize/deserialize an AVL tree??
+Only store the  
+"""

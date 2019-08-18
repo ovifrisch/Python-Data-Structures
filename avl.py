@@ -110,6 +110,38 @@ class AVL:
 			node = node.left
 		return node.val
 
+
+
+
+	"""
+	return the inorder traversal of the
+	tree as a list
+	"""
+	def inorder(self):
+		res = []
+		def helper(root):
+			if (not root):
+				return
+			helper(root.left)
+			res.append(root.val)
+			helper(root.right)
+		helper(self.root)
+		return res
+
+	def __next__(self):
+		def helper(root):
+			if (not root):
+				return
+			helper(root.left)
+			yield root.val
+			helper(root.right)
+		helper(self.root)
+		yield self
+
+	def __iter__(self):
+		return self
+
+
 	def remove(self, val):
 
 		def helper(root, target):
@@ -182,16 +214,9 @@ if __name__ == "__main__":
 	avl = AVL()
 	for i in range(10):
 		avl.insert(i)
-		if (not avl.is_balanced()):
-			print("not good")
 
-	for i in range(9, -1, -1):
-		avl.remove(i)
-		if (not avl.is_balanced()):
-			print("not good")
-	print(len(avl))
-
-
+	for node in avl:
+		print(node)
 
 
 

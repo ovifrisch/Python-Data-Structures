@@ -1,4 +1,0 @@
-btree
-red black
-kd
-treap

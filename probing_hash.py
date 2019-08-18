@@ -88,7 +88,7 @@ class ProbingHash:
 		for item in old_array:
 			if (item is None):
 				continue
-			self[key] = {'key':item['key'], 'val':item['val']}
+			self[item['key']] = item['val']
 
 	"""
 	Add key val pair to hash
@@ -157,10 +157,8 @@ if __name__ == "__main__":
 	h = ProbingHash(probing_function=(lambda x: pow(x, 2)))
 	h[0] = 1
 	h[2] = 2
-	h['cat'] = 1
-	h[1] = 'cat'
-	h['cat'] = 'cat'
-	h['dog'] = 'cat'
+	h[3] = 4
+	h[7] = 2
 	print(h)
 	print(len(h))
 

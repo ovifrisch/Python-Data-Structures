@@ -1,0 +1,8 @@
+red black
+kd
+treap
+mst
+merkle
+leftist heap
+cuckoo
+graph

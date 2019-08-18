@@ -92,6 +92,28 @@ class DLL:
          self.size -= 1
          return x
 
+
+   def reverse(self):
+      pass
+
+   def merge(self, other):
+      pass
+
+   def remove_loop(self):
+      pass
+
+   def sort(self):
+      pass
+
+   """
+
+   """
+   def rotate(self, k):
+      pass
+
+   def tree_to_list(root):
+      pass
+
    def pop_back(self):
       if (not self.head):
          raise Exception("deleting from empty list!")
