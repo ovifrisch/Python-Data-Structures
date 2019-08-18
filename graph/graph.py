@@ -5,7 +5,7 @@ class Graph:
 	def __init__(self, impl="list"):
 		if (impl == "list"):
 			self.graph = Adjacency_List()
-		elif (imple == "matrix"):
+		elif (impl == "matrix"):
 			self.graph = Adjacency_Matrix()
 		else:
 			raise Exception("Invalid implementation")
