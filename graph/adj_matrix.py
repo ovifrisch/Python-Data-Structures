@@ -80,16 +80,6 @@ class Adjacency_Matrix:
 
 if __name__ == "__main__":
 	g = Adjacency_Matrix()
-	g.add_vertex("Ovidiu")
-	g.add_vertex("Daniel")
-	g.add_vertex("Tati")
-	g.add_vertex("Alina")
-	g.add_edge("Ovidiu", "Daniel")
-	g.add_edge("Tati", "Alina")
-	g.add_edge("Alina", "Ovidiu")
-	g.add_edge("Ovidiu", "Alina")
-	print(g)
-	g.remove_vertex("Alina")
 	print(g)
 
 

@@ -66,11 +66,6 @@ class Adjacency_List:
 
 if __name__ == "__main__":
 	g = Adjacency_List()
-	g.add_vertex("Ovidiu")
-	g.add_vertex("Daniel")
-	g.add_edge("Ovidiu", "Daniel")
-	g.add_edge("Daniel", "Ovidiu")
-	print(g.get_neighbors("Ovidiu"))
 	print(g)
 
 
