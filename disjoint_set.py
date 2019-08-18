@@ -22,12 +22,12 @@ class DisjointSet:
 		for node in self.array:
 			if (node.data == data):
 				raise Exception("This element already exists")
+
+		# hash the index of the data
 		self.hash[data] = len(self.array)
 		self.array.append(self.Node(data, -1, 1, 0))
+		self.num_sets += 1
 
-
-	def remove(self, data):
-		pass
 
 	def union(self, data1, data2, by=None):
 		if (data1 not in self.hash or data2 not in self.hash):
@@ -35,6 +35,8 @@ class DisjointSet:
 
 		p1 = self.find(data1)
 		p2 = self.find(data2)
+		if (p1 == p2):
+			raise Exception("These elements cannot be unioned because they belong to the same set")
 		s1 = self.array[p1].size
 		s2 = self.array[p2].size
 		r1 = self.array[p2].rank
@@ -42,18 +44,17 @@ class DisjointSet:
 		new_rank = r1 + 1 if r1==r2 else max(r1, r2)
 		new_size = s1 + s2
 
-		if (not by):
-			self.array[p2].parent = p1
-			self.array[p1].size = new_size
-			self.array[p1].rank = new_rank
-			return
-
 		def helper(new_parent, child, new_size, new_rank):
 			self.array[child].parent = new_parent
 			self.array[new_parent].size = new_size
 			self.array[new_parent].rank = new_rank
 
-		if (by == "rank"):
+		if (not by):
+			self.array[p2].parent = p1
+			self.array[p1].size = new_size
+			self.array[p1].rank = new_rank
+
+		elif (by == "rank"):
 			if (r1 <= r2):
 				helper(p2, p1, new_size, new_rank)
 			else:
@@ -64,7 +65,9 @@ class DisjointSet:
 			else:
 				helper(p1, p2, new_size, new_rank)
 		else:
-			raise Exception("Invalid union by")
+			raise Exception("Invalid by argument: {}".format(by))
+
+		self.num_sets -= 1
 
 
 	"""
