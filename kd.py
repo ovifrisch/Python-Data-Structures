@@ -23,8 +23,8 @@ class KDTree:
 			self.num_dims = None
 			return
 
-		# if (points.shape[1] > 0):
-		# 	points = np.unique(points, axis=0)
+		if (points.shape[1] > 0):
+			points = np.unique(points, axis=0)
 		self.num_dims = points.shape[1]
 		self.root = self.make_kd(points, dim=0)
 		self.size = points.shape[0]
