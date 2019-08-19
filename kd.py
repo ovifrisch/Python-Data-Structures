@@ -108,7 +108,7 @@ class KDTree:
 
 
 
-	def find_max(self, root, dim):
+	def find_max(self, node, dim):
 		if (not node.left and not node.right):
 			return node.point
 
@@ -133,13 +133,13 @@ class KDTree:
 			raise Exception("Cannot remove nonexistent point")
 
 		def helper(point, root):
-			if (array_equal(point, root.point)):
+			if (np.array_equal(point, root.point)):
 				if (root.right):
-					replacement = self.find_min(root.right)
+					replacement = self.find_min(root.right, root.dim)
 					root.point = replacement
 					root.right = helper(replacement, root.right)
 				elif (root.left):
-					replacement = self.find_max(root.left)
+					replacement = self.find_max(root.left, root.dim)
 					root.point = replacement
 					root.left = helper(replacement, root.left)
 				else:
@@ -216,8 +216,11 @@ if __name__ == "__main__":
 			if (not t.contains(points[i, :])):
 				print("fuck")
 
+	t.remove(points[0, :])
+	print(t.contains(points[0, :]))
+	print(t.contains(points[1, :]))
 
-	
+
 
 
 	# print(points[0])
