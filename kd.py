@@ -47,18 +47,17 @@ class KDTree:
 
 		# find the minimum distance to the right that gives a diff num
 		right_idx = median_idx
-		while (right_idx < sorted_idxs.shape[0] - 1 and points[right_idx+1, dim] == median_val):
+		while (right_idx < sorted_idxs.shape[0] - 1 and points[sorted_idxs[right_idx+1], dim] == median_val):
 			right_idx += 1
 
-		median = points[right_idx, :]
-		left = points[:right_idx, :]
-		right = points[right_idx + 1:, :]
+		median = points[sorted_idxs[right_idx], :]
+		left = points[sorted_idxs[:right_idx], :]
+		right = points[sorted_idxs[right_idx + 1:], :]
 
 		next_dim = self.next_dim(dim)
 
 		left_child = self.make_kd(left, next_dim)
 		right_child = self.make_kd(right, next_dim)
-		print("inserted point {}".format(median))
 		return self.Node(median, dim, left_child, right_child)
 
 
@@ -81,11 +80,81 @@ class KDTree:
 		self.root = helper(point, self.root, self.root.dim)
 		self.size += 1
 
+	"""
+	find the min and max points along dim starting at node
+	"""
+
+	def find_min(self, node, dim):
+		
+		if (not node.left and not node.right):
+			return node.point
+
+		if (node.dim == dim):
+			if (node.left):
+				return self.find_min(node.left)
+			return node.point
+
+		if (not node.right):
+			return self.find_min(node.left)
+		if (not node.left):
+			return self.find_min(node.right)
+
+		left = self.find_min(node.left)
+		right = self.find_min(node.right)
+		if (left[dim] < right[dim]):
+			return left
+		return right
+
+
+
+
+	def find_max(self, root, dim):
+		if (not node.left and not node.right):
+			return node.point
+
+		if (node.dim == dim):
+			if (node.right):
+				return self.find_max(node.right)
+			return node.point
+
+		if (not node.right):
+			return self.find_min(node.left)
+		if (not node.left):
+			return self.find_min(node.right)
+
+		left = self.find_min(node.left)
+		right = self.find_min(node.right)
+		if (left[dim] > right[dim]):
+			return left
+		return right
+
 	def remove(self, point):
 		if (not self.contains(point)):
 			raise Exception("Cannot remove nonexistent point")
 
-		# remove the point
+		def helper(point, root):
+			if (array_equal(point, root.point)):
+				if (root.right):
+					replacement = self.find_min(root.right)
+					root.point = replacement
+					root.right = helper(replacement, root.right)
+				elif (root.left):
+					replacement = self.find_max(root.left)
+					root.point = replacement
+					root.left = helper(replacement, root.left)
+				else:
+					root = None
+
+			else:
+				if (point[root.dim] > root.point[root.dim]):
+					root.right = helper(point, root.right)
+				else:
+					root.left = helper(point, root.left)
+
+			return root
+
+
+		self.root = helper(point, self.root)
 
 		self.size -= 1
 
@@ -94,7 +163,6 @@ class KDTree:
 		def helper(point, root):
 			if (not root):
 				return False
-
 			if (np.array_equal(point, root.point)):
 				return True
 
@@ -111,14 +179,29 @@ class KDTree:
 	inorder travsersal of tree
 	"""
 	def __repr__(self):
-		return ""
+		res = ""
+
+		def helper(root):
+			nonlocal res
+			if (not root):
+				return
+
+			helper(root.left)
+
+			res += str(root.point) + ", "
+
+			helper(root.right)
+
+		helper(self.root)
+
+		return res
 
 
 
 if __name__ == "__main__":
 
 	# 100 points in 5 dimensions
-	rows = 20
+	rows = 4
 	cols = 5
 	points = np.zeros((rows, cols))
 
@@ -128,6 +211,17 @@ if __name__ == "__main__":
 			points[i][j] = random.randint(-1000, 1000)
 
 	t = KDTree(points)
+	for i in range(rows):
+		for j in range(cols):
+			if (not t.contains(points[i, :])):
+				print("fuck")
+
+
+	
+
+
+	# print(points[0])
+	# t.remove(points[0])
 
 
 
