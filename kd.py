@@ -16,9 +16,15 @@ class KDTree:
 	points: a 2D numpy array.
 	each row is a point
 	"""
-	def __init__(self, points):
-		if (points.shape[1] > 0):
-			points = np.unique(points, axis=0)
+	def __init__(self, points=None):
+		if (points is None):
+			self.size = 0
+			self.root = None
+			self.num_dims = None
+			return
+
+		# if (points.shape[1] > 0):
+		# 	points = np.unique(points, axis=0)
 		self.num_dims = points.shape[1]
 		self.root = self.make_kd(points, dim=0)
 		self.size = points.shape[0]
@@ -42,13 +48,15 @@ class KDTree:
 
 		sorted_idxs = np.argsort(points[:, dim])
 		median_idx = sorted_idxs.shape[0] // 2
-		median_val = points[median_idx, dim]
+		median_val = points[sorted_idxs[median_idx], dim]
 
 
 		# find the minimum distance to the right that gives a diff num
 		right_idx = median_idx
 		while (right_idx < sorted_idxs.shape[0] - 1 and points[sorted_idxs[right_idx+1], dim] == median_val):
 			right_idx += 1
+
+
 
 		median = points[sorted_idxs[right_idx], :]
 		left = points[sorted_idxs[:right_idx], :]
@@ -62,13 +70,14 @@ class KDTree:
 
 
 	def insert(self, point):
+		if (self.num_dims is None):
+			self.num_dims = point.shape[0]
 		if (self.contains(point)):
 			raise Exception("point already exists")
 
 		# dim and root.dim should always be equal
 		# including dim for when root is None
-		def helper(self, point, root, dim):
-
+		def helper(point, root, dim):
 			if (not root):
 				return self.Node(point, dim)
 
@@ -76,8 +85,9 @@ class KDTree:
 				root.right = helper(point, root.right, self.next_dim(dim))
 			else:
 				root.left = helper(point, root.left, self.next_dim(dim))
+			return root
 
-		self.root = helper(point, self.root, self.root.dim)
+		self.root = helper(point, self.root, 0)
 		self.size += 1
 
 	"""
@@ -91,16 +101,16 @@ class KDTree:
 
 		if (node.dim == dim):
 			if (node.left):
-				return self.find_min(node.left)
+				return self.find_min(node.left, dim)
 			return node.point
 
 		if (not node.right):
-			return self.find_min(node.left)
+			return self.find_min(node.left, dim)
 		if (not node.left):
-			return self.find_min(node.right)
+			return self.find_min(node.right, dim)
 
-		left = self.find_min(node.left)
-		right = self.find_min(node.right)
+		left = self.find_min(node.left, dim)
+		right = self.find_min(node.right, dim)
 		if (left[dim] < right[dim]):
 			return left
 		return right
@@ -114,16 +124,16 @@ class KDTree:
 
 		if (node.dim == dim):
 			if (node.right):
-				return self.find_max(node.right)
+				return self.find_max(node.right, dim)
 			return node.point
 
 		if (not node.right):
-			return self.find_min(node.left)
+			return self.find_max(node.left, dim)
 		if (not node.left):
-			return self.find_min(node.right)
+			return self.find_max(node.right, dim)
 
-		left = self.find_min(node.left)
-		right = self.find_min(node.right)
+		left = self.find_max(node.left, dim)
+		right = self.find_max(node.right, dim)
 		if (left[dim] > right[dim]):
 			return left
 		return right
@@ -185,7 +195,6 @@ class KDTree:
 			nonlocal res
 			if (not root):
 				return
-
 			helper(root.left)
 
 			res += str(root.point) + ", "
@@ -201,24 +210,20 @@ class KDTree:
 if __name__ == "__main__":
 
 	# 100 points in 5 dimensions
-	rows = 4
+	rows = 10000
 	cols = 5
 	points = np.zeros((rows, cols))
 
 	for i in range(rows):
 		for j in range(cols):
-			# generate a random number
-			points[i][j] = random.randint(-1000, 1000)
+			points[i][j] = random.randint(-100, 100)
 
 	t = KDTree(points)
-	for i in range(rows):
-		for j in range(cols):
-			if (not t.contains(points[i, :])):
-				print("fuck")
 
-	t.remove(points[0, :])
-	print(t.contains(points[0, :]))
-	print(t.contains(points[1, :]))
+
+	for i in range(rows):
+		if (not t.contains(points[i, :])):
+			print("fuck{}".format(i))
 
 
 
