@@ -88,6 +88,7 @@ class LeftistHeap:
 	def is_valid(self):
 		valid = True
 		def postorder(root):
+			nonlocal valid
 			if (not root):
 				return -1
 			left_npl = 1 + postorder(root.left)
@@ -97,7 +98,8 @@ class LeftistHeap:
 				valid = False
 			return min(left_npl, right_npl)
 
-		return postorder(self.root)
+		postorder(self.root)
+		return valid
 
 
 
