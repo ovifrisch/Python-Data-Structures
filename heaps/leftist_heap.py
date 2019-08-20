@@ -170,7 +170,7 @@ class LeftistHeap:
 				res += "None, "
 
 			else:
-				res += "{}:{}, ".format(str(x.data), str(x.size))
+				res += "{}, ".format(str(x.data))
 				if (x.left or x.right):
 					q.append(x.left)
 					q.append(x.right)
