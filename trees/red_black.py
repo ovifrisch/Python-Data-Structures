@@ -115,15 +115,83 @@ class RedBlackTree:
 		self.root.is_red = False
 		self.size += 1
 
+
+	def find_min(self, root):
+		if (not root.left):
+			return root.data
+		return self.find_min(root.left)
+
+	def find_max(self, root):
+		if (not root.right_right):
+			return root.data
+		return self.find_max(root.right)
+
 	def remove(self, data):
 
 		def helper(root):
 			nonlocal data
-			pass
+			if (not root):
+				return None
+			# found data
+			if (root.data == data):
+				# no children, so just remove it
+				if (not root.left and not root.right):
+					return None
+				# replace with minimum element in right subtree
+				if (root.right):
+					root.data = self.find_min(root.right)
+				# replace with maximum element in left subtree
+				else:
+					root.data = self.find_max(root.right)
+
+
+			# we have either replaced the deleted value or it is still to be found
+			# in either case, we still must remove a node from the tree (the logical
+			# target or the replacement)
+
+			# X is the next node, T is its sibling
+			X = T = None
+			if (data > root.data or (data == root.data and root.right)):
+				X = root.right
+				T = root.left
+			else:
+				X = root.left
+				T = root.right
+
+			# X is nonempty, T may be empty
+			root.is_red = False
+			X.is_red = True
+
+			# first main case: X has two black children
+			if ((not X.left or not X.left.is_red) and (not X.right or not X.right.is_red)):
+
+				# T is empty or does not have a red child
+				if (not T or ((not T.left or not T.left.is_red) and (not T.right or not T.right.is_red))):
+					pass
+
+				# T is nonempty and has a left red child
+				elif (T.left and T.left.is_red):
+					pass
+
+				# T is nonempty and has a right red child
+				else:
+					pass
+
+			# second main case: X has at least one red child
+			else:
+				
+
+
+
+
+
 
 
 		if (not self.contains(data)):
 			raise Exception("Cannot remove {} because it does not exist".format(data))
+
+		if (self.root):
+			self.root.is_red = True
 		self.root = helper(self.root)
 		self.size -= 1
 
