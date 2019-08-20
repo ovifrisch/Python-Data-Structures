@@ -32,7 +32,7 @@ class LeftistHeap:
 			q.append({'node':fq.left, 'npl':fq['npl'] + 1})
 
 
-	def get_nlp(self, node):
+	def get_npl(self, node):
 		if (not node):
 			return -1
 		return node.nlp
@@ -65,11 +65,11 @@ class LeftistHeap:
 		else:
 			small.right = self.merge_recursive(big, small.right)
 
-		if (self.get_nlp(small.left) < self.nlp(small.right)):
+		if (self.get_npl(small.left) < self.npl(small.right)):
 			temp = small.left
 			small.left = small.right
 			small.right = temp
-			small.nlp = 1 + self.get_nlp(small.right)
+			small.nlp = 1 + self.get_npl(small.right)
 		return small
 
 	def merge(self, other):
@@ -86,7 +86,20 @@ class LeftistHeap:
 		return self.merge_recursive(small, big)
 
 	def is_valid(self):
-		pass
+		valid = True
+		def postorder(root):
+			if (not root):
+				return -1
+			left_npl = 1 + postorder(root.left)
+			right_npl = 1 + postorder(root.right)
+
+			if (left_npl < right_npl):
+				valid = False
+			return min(left_npl, right_npl)
+
+		return postorder(self.root)
+
+
 
 
 	def __len__(self):
