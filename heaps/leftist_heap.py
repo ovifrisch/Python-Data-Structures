@@ -95,17 +95,16 @@ class LeftistHeap:
 			p1.right = temp
 		return p1
 
-	def merge(self, other_):
-		other = copy.deepcopy(other_)
+	def merge(self, other):
 		if (len(self) == 0):
-			self.root = other.root
+			self.root = copy.copy(other.root)
 			return
 		elif (len(other) == 0):
 			return
 		elif (self.has_priority(self.get_top(), other.get_top())):
 			self.root = self.merge_recursive(self.root, other.root)
 		else:
-			self.root = self.merge_recursive(other.root, self.root)
+			self.root = self.merge_recursive(copy.copy(other.root), self.root)
 
 
 	"""
@@ -200,16 +199,16 @@ if __name__ == "__main__":
 	print(len(heap2))
 
 	heap1.merge(heap2)
-	print(heap1.is_valid())
-	print(len(heap1))
+	# print(heap1.is_valid())
+	# print(len(heap1))
 
-	print(heap2.is_valid())
+	# print(heap2.is_valid())
 	print(len(heap2))
 
-	while (len(heap1) > 0):
-		heap1.remove_min()
+	# while (len(heap1) > 0):
+	# 	heap1.remove_min()
 
-	print(heap1)
+	# print(heap1)
 
 
 
