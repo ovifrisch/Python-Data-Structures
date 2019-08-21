@@ -31,14 +31,38 @@ class BinomialQueue:
 				raise Exception("cannot get top of empty tree")
 			return self.root.data
 
+		def __repr__(self):
+			if (not self.root):
+				return "[]"
+
+			q = [self.root]
+
+			res = "["
+
+			while (q):
+				x = q.pop(0)
+				if (not x):
+					res += "None, "
+
+				else:
+					res += "{}, ".format(str(x.data))
+					if (len(x.children) > 0):
+						for child in x.children:
+							q.append(child)
+
+			res = res[:-2] + "]"
+			return res
+
 
 
 
 	def __init__(self, has_priortiy=None, lone_tree=None):
+		self.size = 0
 		if (not lone_tree):
 			self.queue = [] # sorted list (by height) of binomial trees
 		else:
 			self.queue = [lone_tree]
+			self.size += pow(2,lone_tree.k)
 		self.has_priortiy = has_priortiy
 		self.hash = {}
 
@@ -65,7 +89,7 @@ class BinomialQueue:
 				return False
 		return True
 
-	def remove_min(self, data):
+	def remove_min(self):
 		
 		def smallest_idx():
 			if (len(self.queue) == 0):
@@ -88,21 +112,24 @@ class BinomialQueue:
 			get all the children of this tree
 			(they should be in sorted order)
 			"""
-			children = []
-			for i in range(len(tree.root.children)):
-				children.append(self.BinomialTree(children[i]), i, self.has_priortiy)
-			return children
+			queue_children = []
+			roots_children = tree.root.children
+			for i in range(len(roots_children)):
+				queue_children.append(self.BinomialTree(roots_children[i], i, self.has_priortiy))
+			return queue_children
 
-		if (data not in self.hash):
-			raise Exception("cannot remove {} because it does not exist".format(data))
+		if (len(self.queue) == 0):
+			raise Exception("cannot remove min on empty queue")
 
-		self.hash.pop(data) # remove from hash
 		min_idx = smallest_idx()
 		popped_tree = self.queue.pop(min_idx) # remove the tree
+		val = popped_tree.get_top()
+		self.hash.pop(val) # remove from hash
 		to_merge = BinomialQueue(has_priortiy=self.has_priortiy)
 		to_merge.set_queue(get_children(popped_tree)) # add popped's node's children
 		self.merge(to_merge)
 		self.size -= 1
+		return val
 
 	def merge(self, other):
 		q3 = [] # the merged queue
@@ -139,7 +166,7 @@ class BinomialQueue:
 				# if the trees have the same height, merge them together
 				if (q1[idx1].k == q2[idx2].k):
 					q1[idx1].merge(q2[idx2])
-					q3.append(q1[idx2])
+					q3.append(q1[idx1])
 					idx1 += 1
 					idx2 += 1
 				else:
@@ -158,12 +185,18 @@ class BinomialQueue:
 		self.queue = q3
 
 
-
 	def __len__(self):
-		return self.size()
+		return self.size
 
+	"""
+	print the level order traversal of each of the binomial trees
+	"""
 	def __repr__(self):
-		pass
+		res = ""
+		for tree in self.queue:
+			res += tree.__repr__()
+			res += "\n"
+		return res
 
 
 if __name__ == "__main__":
@@ -171,13 +204,18 @@ if __name__ == "__main__":
 	bq = BinomialQueue(priority)
 
 
-	nums = list(range(0, 1000))
-	while (nums):
+	nums = list(range(0, 10000))
+	for i in range(1000):
 		num = nums.pop(random.randint(0, len(nums) - 1))
 		bq.insert(num)
 		print("inserted {}".format(num))
 
-	print(bq.is_valid_queue())
+	print(bq)
+	print(len(bq.queue))
+
+	# while (len(bq) > 0):
+	# 	val = bq.remove_min()
+	# 	print("Removed {}".format(val))
 
 
 
