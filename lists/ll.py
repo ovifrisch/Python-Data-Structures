@@ -21,6 +21,18 @@ class LinkedList:
 		self.head = None
 		self.init_list(data)
 
+	def __next__(self):
+		if (not self.curr_it):
+			raise StopIteration
+		else:
+			x = self.curr_it.data
+			self.curr_it += 1
+			return x
+
+	def __iter__(self):
+		self.curr_it = self.head
+		return self
+
 
 	def init_list(self, data):
 		for i in range(len(data) -1, -1, -1):
@@ -57,6 +69,14 @@ class LinkedList:
 			curr += 1
 		return res
 
+
+	"""
+	assuming self is sorted, insert
+	data in its correct position in
+	O(logN) time using O(1) space.
+	"""
+	def insert_sorted(self, data):
+		pass
 
 	"""
 	insert data at the given position
@@ -212,7 +232,6 @@ class LinkedList:
 
 if __name__ == "__main__":
 	x = LinkedList([1, 2, 3, 4])
-	print(x)
 
 
 

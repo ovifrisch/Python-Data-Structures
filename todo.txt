@@ -3,15 +3,11 @@ caches/lru
 hashes/cuckoo_hash
 hashes/extendible_hash
 heaps/fibonacci_heap
-heaps/leftist_heap
 heaps/pairing_heap
-heaps/skew_heap
-misc/binomial_queue
 trees/cartesian_tree
 trees/expression_tree
 trees/interval_tree
 teees/merkle_tree
-trees/mst
 trees/radix_tree
 trees/red_black
 trees/segment
@@ -19,4 +15,3 @@ trees/suffix_tree
 trees/suffix_array
 trees/ternary_search_tree
 trees/top_down_splay
-lists/ll

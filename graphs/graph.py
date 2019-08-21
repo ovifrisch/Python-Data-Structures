@@ -13,8 +13,8 @@ class Graph:
 	def add_vertex(self, vertex):
 		self.graph.add_vertex(vertex)
 
-	def add_edge(self, vertex1, vertex2):
-		self.graph.add_edge(vertex1, vertex2)
+	def set_edge(self, vertex1, vertex2, edge_cost):
+		self.graph.set_edge(vertex1, vertex2, edge_cost)
 
 	def remove_edge(self, vertex1, vertex2):
 		self.graph.remove_edge(vertex1, vertex2)
@@ -28,7 +28,10 @@ class Graph:
 	def get_neighbors(self, vertex):
 		return self.graph.get_neighbors(vertex)
 
-	def contains_vertex(vertex):
+	def get_edge(self, vertex1, vertex2):
+		return self.graph.get_edge(vertex1, vertex2)
+
+	def contains_vertex(self, vertex):
 		vertices = self.graph.get_vertices()
 		return vertex in vertices
 
@@ -39,10 +42,18 @@ class Graph:
 		return self.graph.__repr__()
 
 if __name__ == "__main__":
-	g = Graph("list")
-	g.add_vertex("1")
-	print(g)
+	l = Graph("list")
+	m = Graph("matrix")
 
+	vertices = ['a', 'b', 'c', 'd', 'e']
+	for v in vertices:
+		l.add_vertex(v)
+		m.add_vertex(v)
+
+	l.set_edge('a', 'e', 3)
+	m.set_edge('a', 'e', 3)
+	print(l)
+	print(m)
 
 
 

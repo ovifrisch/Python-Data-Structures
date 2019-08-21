@@ -17,3 +17,8 @@ trees/btree
 trees/tree
 trees/trie
 trees/treap
+lists/ll
+trees/mst
+heaps/leftist_heap
+heaps/skew_heap
+heaps/binomial_queue

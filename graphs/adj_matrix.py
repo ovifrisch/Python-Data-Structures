@@ -8,11 +8,18 @@ class Adjacency_Matrix:
 		# hash from each vertex to its index in the adjacency matrix
 		self.hash = QuadraticProbingHash()
 
-	def add_edge(self, v1, v2):
+	def add_vertex(self, v):
+		self.hash[v] = len(self.vertices)
+		self.vertices.append(v)
+		for i in range(len(self.adjacency_matrix)):
+			self.adjacency_matrix[i].append(False)
+		self.adjacency_matrix.append([False] * len(self.vertices))
+
+	def set_edge(self, v1, v2, edge_cost):
 		if (not self.hash.contains(v1) or not self.hash.contains(v2)):
 			raise Exception("v1 and v2 must exist")
 
-		self.adjacency_matrix[self.hash[v1]][self.hash[v2]] = True
+		self.adjacency_matrix[self.hash[v1]][self.hash[v2]] = edge_cost
 
 	def remove_edge(self, v1, v2):
 		if (not self.hash.contains(v1) or not self.hash.contains(v2)):
@@ -38,13 +45,6 @@ class Adjacency_Matrix:
 	def get_vertices(self):
 		return self.vertices
 
-	def add_vertex(self, v):
-		self.hash[v] = len(self.vertices)
-		self.vertices.append(v)
-		for i in range(len(self.adjacency_matrix)):
-			self.adjacency_matrix[i].append(False)
-		self.adjacency_matrix.append([False] * len(self.vertices))
-
 	def get_neighbors(self, v):
 		if (not self.hash.contains(v)):
 			raise Exception("Cannot get neigbors of vertex {} because it does not exist".format(v))
@@ -54,6 +54,15 @@ class Adjacency_Matrix:
 			if (val):
 				neighbors.append(self.vertices[i])
 		return neighbors
+
+	def get_edge(self, v1, v2):
+		if (not self.hash.contains(v1) or not self.hash.contains(v2)):
+			raise Exception("v1 and v2 must exist")
+
+		edge = self.adjacency_matrix[self.hash[v1]][self.hash[v2]]
+		if (edge):
+			return edge
+		raise Exception("no edge between v1 and v2")
 
 	def __repr__(self):
 		res = ""
@@ -69,12 +78,10 @@ class Adjacency_Matrix:
 			res += self.vertices[i] + offset[len(self.vertices[i]):]
 			for j in range(len(self.adjacency_matrix[i])):
 				x = [" "] * len(self.vertices[j])
-				x[len(x) // 2] = "1" if self.adjacency_matrix[i][j] else "0"
+				x[len(x) // 2] = str(self.adjacency_matrix[i][j]) if self.adjacency_matrix[i][j] else "0"
 				res += ''.join(x) + "  "
 			res += "\n"
 		return res
-
-
 
 
 

@@ -8,23 +8,22 @@ class Adjacency_List:
 		# map vertices to index in list
 		self.hash = QuadraticProbingHash()
 
-	def add_edge(self, v1, v2):
-		if (not self.hash.contains(v1) or not self.hash.contains(v2)):
-			raise Exception("v1 and v2 must exist")
-
-		self.adj_list[self.hash[v1]]['neighbors'].insert_front(v2)
-
 	def add_vertex(self, v):
 		self.hash[v] = len(self.adj_list)
 		self.adj_list.append({'vertex': v, 'neighbors': DLL()})
 
-	def remove_edge(self, v1, v2):
+	def set_edge(self, v1, v2, edge_cost):
 		if (not self.hash.contains(v1) or not self.hash.contains(v2)):
 			raise Exception("v1 and v2 must exist")
 
-		if (not self.adj_list[self.hash[v1]]['neighbors'].contains(v2)):
+		self.adj_list[self.hash[v1]]['neighbors'].insert_front({'vertex':v2, 'cost':edge_cost})
+
+	def remove_edge(self, v1, v2):
+		if (not self.hash.contains(v1) or not self.hash.contains(v2)):
+			raise Exception("v1 and v2 must exist")
+		if (not self.adj_list[self.hash[v1]]['neighbors'].contains(p=lambda x: x['vertex'] == v2)):
 			raise Exception("Cannot remove edge between {} and {} because there isn't one".format(v1, v2))
-		self.adj_list[self.hash[v1]]['neighbors'].remove(v2)
+		self.adj_list[self.hash[v1]]['neighbors'].remove_if(p=lambda x: x['vertex'] == v2)
 
 	def remove_vertex(self, v):
 		if (not self.hash.contains(v)):
@@ -37,8 +36,8 @@ class Adjacency_List:
 
 		# remove from all adjacency lists
 		for i in range(len(self.adj_list)):
-			if (self.adj_list[i]['neighbors'].contains(v)):
-				self.adj_list[i]['neighbors'].remove(v)
+			if (self.adj_list[i]['neighbors'].contains(p=lambda x: x['vertex'] == v)):
+				self.adj_list[i]['neighbors'].remove_if(p=lambda x: x['vertex'] == v)
 
 
 	def get_vertices(self):
@@ -47,15 +46,26 @@ class Adjacency_List:
 	def get_neighbors(self, v):
 		if (not self.hash.contains(v)):
 			raise Exception("Cannot get neigbors of vertex {} because it does not exist".format(v))
-		return self.adj_list[self.hash[v]]['neighbors'].to_list()
+		return [x['vertex'] for x in self.adj_list[self.hash[v]]['neighbors'].to_list()]
+
+	def get_edge(self, v1, v2):
+		if (not self.hash.contains(v1) or not self.hash.contains(v2)):
+			raise Exception("v1 and v2 must exist")
+
+		if (not self.adj_list[self.hash[v1]]['neighbors'].contains(p=lambda x: x['vertex'] == v2)):
+			raise Exception("no edge between v1 and v2")
+
+		for item in self.adj_list[self.hash[v1]]['neighbors']:
+			if (item['vertex'] == v2):
+				return item['cost']
 
 	def __repr__(self):
 		res = ""
 		for i in range(len(self.adj_list)):
 			res += self.adj_list[i]['vertex']
 			res += ": "
-			for neighbor in self.adj_list[i]['neighbors']:
-				res += neighbor + ", "
+			for item in self.adj_list[i]['neighbors']:
+				res += item['vertex'] + ", "
 			res += "\n"
 		return res[:-1]
 
@@ -66,6 +76,16 @@ class Adjacency_List:
 
 if __name__ == "__main__":
 	g = Adjacency_List()
+	vertices = ['a', 'b', 'c', 'd', 'e']
+	for v in vertices:
+		g.add_vertex(v)
+
+	g.set_edge('a', 'b', 3)
+	g.set_edge('a', 'd', 5)
+	g.remove_vertex('b')
+	g.remove_edge('a', 'd')
+
+
 	print(g)
 
 

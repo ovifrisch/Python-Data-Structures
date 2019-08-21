@@ -67,6 +67,8 @@ class DLL:
       self.head.next = temp
       if (not self.head.next):
          self.tail = self.head
+      else:
+         self.head.next.prev = self.head
       self.size += 1
 
    def insert_back(self, data):
@@ -127,10 +129,12 @@ class DLL:
       self.size -= 1
       return x
 
-   def contains(self, data):
+   def contains(self, data=None, p=None):
+      if (not data and not p or (data and p)):
+         raise Exception("invalid arguments")
       curr = self.head
       while (curr):
-         if (curr.val == data):
+         if ((p and p(curr.val)) or curr.val == data):
             return True
          curr += 1
       return False
@@ -178,4 +182,6 @@ if __name__ == "__main__":
    for i in range(10):
       nodes.append(Node(i))
    ll = DLL(nodes)
+
+
 
