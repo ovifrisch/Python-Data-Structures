@@ -26,6 +26,11 @@ class BinomialQueue:
 				self.root = other_cpy.root
 			self.k += 1
 
+		def get_top(self):
+			if (not self.root):
+				raise Exception("cannot get top of empty tree")
+			return self.root.data
+
 
 
 
@@ -35,10 +40,22 @@ class BinomialQueue:
 		else:
 			self.queue = [lone_tree]
 		self.has_priortiy = has_priortiy
+		self.hash = {}
+
+	def set_queue(self, q):
+		self.queue = q
+
+	def contains(self, data):
+		return data in self.hash
 
 	def insert(self, data):
+		if (data in self.hash):
+			raise Exception("cannot insert {} because it already exists".format(data))
+
+		self.hash[data] = True
 		one_node_queue = BinomialQueue(lone_tree=self.BinomialTree(self.Node(data), 0, self.has_priortiy))
 		self.merge(one_node_queue)
+		self.size += 1
 
 
 	def is_valid_queue(self):
@@ -49,7 +66,43 @@ class BinomialQueue:
 		return True
 
 	def remove_min(self, data):
-		pass
+		
+		def smallest_idx():
+			if (len(self.queue) == 0):
+				raise Exception("Cannot get smallest idx from empty queue")
+			"""
+			get the index in the queue containing the smallest element
+			"min" assuming small elements have priority
+			"""
+			min_val = self.queue[0].get_top()
+			min_idx = 0
+			for i in range(1, len(self.queue)):
+				if (self.has_priortiy(self.queue[i].get_top(), min_val)):
+					min_val = self.queue[i].get_top()
+					min_idx = i
+
+			return min_idx
+
+		def get_children(tree):
+			"""
+			get all the children of this tree
+			(they should be in sorted order)
+			"""
+			children = []
+			for i in range(len(tree.root.children)):
+				children.append(self.BinomialTree(children[i]), i, self.has_priortiy)
+			return children
+
+		if (data not in self.hash):
+			raise Exception("cannot remove {} because it does not exist".format(data))
+
+		self.hash.pop(data) # remove from hash
+		min_idx = smallest_idx()
+		popped_tree = self.queue.pop(min_idx) # remove the tree
+		to_merge = BinomialQueue(has_priortiy=self.has_priortiy)
+		to_merge.set_queue(get_children(popped_tree)) # add popped's node's children
+		self.merge(to_merge)
+		self.size -= 1
 
 	def merge(self, other):
 		q3 = [] # the merged queue
@@ -107,7 +160,7 @@ class BinomialQueue:
 
 
 	def __len__(self):
-		pass
+		return self.size()
 
 	def __repr__(self):
 		pass
