@@ -1,19 +1,18 @@
 import random
+import copy
 
 class BinomialQueue:
 
 	class Node:
-		def __init__(self, data, children=None):
+		def __init__(self, data):
 			self.data = data
-			if (not children):
-				children = []
-			else:
-				children = children
+			self.children = []
 
 	class BinomialTree:
 		def __init__(self, root, k, has_priortiy):
 			self.root = root
 			self.k = k
+			self.has_priortiy = has_priortiy
 
 		def merge(self, other):
 			if (self.k != other.k or not self.root or not other.root):
@@ -24,21 +23,21 @@ class BinomialQueue:
 			else:
 				other_cpy = copy.copy(other)
 				other_cpy.root.children.append(self.root)
-				self.root = other_cpy
+				self.root = other_cpy.root
 			self.k += 1
 
 
 
 
-	def __init__(self, has_priortiy=None, queue=None):
-		if (not queue):
+	def __init__(self, has_priortiy=None, lone_tree=None):
+		if (not lone_tree):
 			self.queue = [] # sorted list (by height) of binomial trees
 		else:
-			queue = queue
+			self.queue = [lone_tree]
 		self.has_priortiy = has_priortiy
 
 	def insert(self, data):
-		one_node_queue = BinomialQueue(queue=[self.BinomialTree(self.Node(data), 0, self.has_priortiy)])
+		one_node_queue = BinomialQueue(lone_tree=self.BinomialTree(self.Node(data), 0, self.has_priortiy))
 		self.merge(one_node_queue)
 
 
@@ -87,13 +86,16 @@ class BinomialQueue:
 				# if the trees have the same height, merge them together
 				if (q1[idx1].k == q2[idx2].k):
 					q1[idx1].merge(q2[idx2])
-					q3.append(q1)
+					q3.append(q1[idx2])
+					idx1 += 1
+					idx2 += 1
 				else:
-					small_tree, idx1, idx2 = (
-						q1[idx1], idx1+1, idx2
-						if q1[idx1].k < q2[idx2].k
-						else q2[idx2], idx1, idx2+1
-					)
+					if (q1[idx1].k < q2[idx2].k):
+						small_tree = q1[idx1]
+						idx1 += 1
+					else:
+						small_tree = q2[idx2]
+						idx2 += 1
 
 					merge_tree(small_tree)
 
@@ -114,5 +116,19 @@ class BinomialQueue:
 if __name__ == "__main__":
 	priority = lambda x, y: x < y
 	bq = BinomialQueue(priority)
-	bq.insert(2)
+
+
+	nums = list(range(0, 1000))
+	while (nums):
+		num = nums.pop(random.randint(0, len(nums) - 1))
+		bq.insert(num)
+		print("inserted {}".format(num))
+
+	print(bq.is_valid_queue())
+
+
+
+
+
+
 
