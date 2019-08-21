@@ -1,6 +1,14 @@
 from dll import DLL
 from quadratic_probing_hash import QuadraticProbingHash
 
+"""
+When to use: when you anticipate the graph having few edges
+Space = O(V + E)
+get_edge, remove_edge = O(E)
+add_vertex, add_edge = O(1)
+So if graph is completely dense, the space requirement is O(V^2) becase there are V^2 edges
+"""
+
 class Adjacency_List:
 	def __init__(self):
 		self.adj_list = []
@@ -59,13 +67,23 @@ class Adjacency_List:
 			if (item['vertex'] == v2):
 				return item['cost']
 
+	"""
+	return a list of all the graph's edges in the form [(from, to, weight), ...]
+	"""
+	def get_edges(self):
+		res = []
+		for item in self.adj_list:
+			for nbr in item['neighbors']:
+				res.append((item['vertex'], nbr['vertex'], nbr['cost']))
+		return res
+
 	def __repr__(self):
 		res = ""
 		for i in range(len(self.adj_list)):
-			res += self.adj_list[i]['vertex']
+			res += str(self.adj_list[i]['vertex'])
 			res += ": "
 			for item in self.adj_list[i]['neighbors']:
-				res += item['vertex'] + ", "
+				res += str(item['vertex']) + ", "
 			res += "\n"
 		return res[:-1]
 

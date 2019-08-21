@@ -1,5 +1,14 @@
 from quadratic_probing_hash import QuadraticProbingHash
 
+
+"""
+When to use: when you anticipate the graph having many edges
+Space = O(V^2)
+get_egde, set_edge, remove_edge = O(1)
+remove_vertex, add_vertex = O(V^2)
+
+"""
+
 class Adjacency_Matrix:
 	def __init__(self):
 		self.vertices = []
@@ -63,6 +72,18 @@ class Adjacency_Matrix:
 		if (edge):
 			return edge
 		raise Exception("no edge between v1 and v2")
+
+	"""
+	return a list of all the graph's edges in the form [(from, to, weight), ...]
+	"""
+	def get_edges(self):
+		res = []
+		for v1 in self.vertices:
+			for v2 in self.vertices:
+				edge = self.adjacency_matrix[self.hash[v1]][self.hash[v2]]
+				if (edge is not False):
+					res.append((v1, v2, edge))
+		return res
 
 	def __repr__(self):
 		res = ""
