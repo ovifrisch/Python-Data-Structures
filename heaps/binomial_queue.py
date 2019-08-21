@@ -30,12 +30,24 @@ class BinomialQueue:
 
 
 
-	def __init__(self, has_priortiy):
-		self.queue = [] # sorted list (by height) of binomial trees
+	def __init__(self, has_priortiy=None, queue=None):
+		if (not queue):
+			self.queue = [] # sorted list (by height) of binomial trees
+		else:
+			queue = queue
 		self.has_priortiy = has_priortiy
 
 	def insert(self, data):
-		pass
+		one_node_queue = BinomialQueue(queue=[self.BinomialTree(self.Node(data), 0, self.has_priortiy)])
+		self.merge(one_node_queue)
+
+
+	def is_valid_queue(self):
+		# make sure the queue is in sorted order
+		for i in range(0, len(self.queue) - 1):
+			if (self.queue[i].k > self.queue[i+1].k):
+				return False
+		return True
 
 	def remove_min(self, data):
 		pass
@@ -46,6 +58,15 @@ class BinomialQueue:
 		q2 = other.queue
 
 		def helper(idx1, idx2):
+			nonlocal q1, q2, q3
+
+			# potentially merge with q3[-1]
+			def merge_tree(tree):
+				nonlocal q3
+				if (q3 != [] and q3[-1].k == tree.k):
+					tree.merge(q3.pop(-1))
+				q3.append(tree)
+
 
 			# mo more trees to merge
 			if (idx1 >= len(q1) and idx2 >= len(q2)):
@@ -53,24 +74,12 @@ class BinomialQueue:
 
 			# trees left in q1
 			elif (idx2 >= len(q2)):
-				if (q3 == [] or q3[-1].k != q1[idx1].k):
-					# just add this one over
-					q3.append(q1[idx1])
-				else:
-					# merge with last tree of q3
-					q1[idx1].merge(q3.pop(-1))
-					q3.append(q1[idx1])
+				merge_tree(q1[idx1])
 				idx1 += 1
 
 			# trees left in q2
 			elif (idx1 >= len(q1)):
-				if (q3 == [] or q3[-1].k != q2[idx2].k):
-					# just add this one over
-					q3.append(q2[idx2])
-				else:
-					# merge with last tree of q3
-					q2[idx2].merge(q3.pop(-1))
-					q3.append(q2[idx2])
+				merge_tree(q2[idx2])
 				idx2 += 1
 
 			# trees left in both
@@ -80,19 +89,14 @@ class BinomialQueue:
 					q1[idx1].merge(q2[idx2])
 					q3.append(q1)
 				else:
-					if (q1[idx1].k < q2[idx2].k):
-						small_tree = q1[idx1]
-						idx1 += 1
-					else:
-						small_tree = q2[idx2]
-						idx2 += 1
+					small_tree, idx1, idx2 = (
+						q1[idx1], idx1+1, idx2
+						if q1[idx1].k < q2[idx2].k
+						else q2[idx2], idx1, idx2+1
+					)
 
-					if (q3 == [] or q3[-1].k != small_tree.k):
-						q3.append(small_tree)
-					else:
-						small_tree.merge(q3.pop(-1))
-						q3.append(small_tree)
-						
+					merge_tree(small_tree)
+
 			helper(idx1, idx2)
 
 		helper(0, 0)
@@ -108,4 +112,7 @@ class BinomialQueue:
 
 
 if __name__ == "__main__":
-	bq = BinomialQueue()
+	priority = lambda x, y: x < y
+	bq = BinomialQueue(priority)
+	bq.insert(2)
+
