@@ -12,7 +12,7 @@ class Adjacency_List:
 		self.hash[v] = len(self.adj_list)
 		self.adj_list.append({'vertex': v, 'neighbors': DLL()})
 
-	def set_edge(self, v1, v2, edge_cost):
+	def set_edge(self, v1, v2, edge_cost=None):
 		if (not self.hash.contains(v1) or not self.hash.contains(v2)):
 			raise Exception("v1 and v2 must exist")
 
