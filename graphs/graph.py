@@ -366,7 +366,32 @@ class Graph:
 
 	def all_paths(self, v1, v2):
 		# get all unique paths from v1 to v2
-		pass
+		"""
+		use the same technique of popping from seen hash when you are done
+		traversing children
+		"""
+		if (not self.contains_vertex(v1)):
+			raise Exception("v1 does not exist")
+
+		res = []
+		seen = {}
+
+		def dfs(path):
+			node = path[-1]
+			if (node in seen):
+				return
+
+			if (node == v2):
+				res.append(path)
+				return
+
+			seen[node] = True
+			for child in self.get_neighbors(node):
+				dfs(path + [child])
+			seen.pop(node)	
+
+		dfs([v1])
+		return res
 
 	def maximum_flow(self):
 		pass
@@ -430,8 +455,9 @@ class Graph:
 
 if __name__ == "__main__":
 	g = Graph("list")
-	vs = ['A', 'B', 'C', 'D']
-	es = [('A', 'B', 5), ('C', 'D', 3), ('B', 'C', -5), ('D', 'A', 1)]
+	vs = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+	es = [('A', 'C', 1), ('A', 'B', 1), ('A', 'D', 1), ('B', 'C', 1), ('B', 'D', 1), 
+	('C', 'B', 1), ('C', 'D', 1), ('D', 'E', 1), ('D', 'F', 1), ('E', 'G', 1), ('F', 'G', 1)]
 	for v in vs:
 		g.add_vertex(v)
 	for e in es:
@@ -441,6 +467,7 @@ if __name__ == "__main__":
 	print(g.get_min_degree())
 	print(g.get_max_degree())
 	print(g.eulerian_path())
+	print((g.all_paths('A', 'G')))
 
 	# g = Graph("list")
 	# m = Graph("matrix")
