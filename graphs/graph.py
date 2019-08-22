@@ -263,6 +263,16 @@ class Graph:
 				return k
 		return None
 
+	def get_incidents(self, v):
+		if (not self.contains_vertex(v)):
+			raise Exception('vertex v must exist')
+
+		res = []
+		for e in self.get_edges():
+			if (e[1] == v):
+				res.append(e[0])
+		return res
+
 
 	"""
 	can be improved by pre-computing indegrees of each vertex
@@ -396,8 +406,46 @@ class Graph:
 	def maximum_flow(self):
 		pass
 
+	"""
+	if the graph is directed, then the bfs/dfs approach won't
+	work if you only include the neighbors of the vertex in
+	the dfs, but it works if we also include the incident
+	veritces, so we do that here.
+	"""
 	def connected_components(self):
-		return 1
+		seen = {}
+		num_components = 0
+		vertices = self.get_vertices()
+		for i in range(len(vertices) - 1, -1, -1):
+			v = vertices[i]
+			if (v in seen):
+				continue
+			num_components += 1
+			visited = {}
+			def dfs(v):
+				if (v in visited):
+					return
+				visited[v] = True
+				seen[v] = True
+				for nbr in self.get_neighbors(v) + self.get_incidents(v):
+					dfs(nbr)
+			dfs(v)
+		return num_components
+
+
+
+		"""
+		can use union find
+		initialize V sets
+		then iterate over the edges,
+		try unioning the vertices of each edge
+		return the number of sets
+
+		could also do a bfs or dfs on each vertex,
+		when a vertex is included in one such search,
+		mark it so that u can skip the search starting
+		there.
+		"""
 
 	def strongly_connected_components(self):
 		pass
@@ -444,9 +492,6 @@ class Graph:
 	def critical_path_analysis(self):
 		pass
 
-	def all_pairs_shortest_path(self):
-		pass
-
 	def traveling_salesman(self, start, vertices):
 		pass 
 
@@ -468,6 +513,7 @@ if __name__ == "__main__":
 	print(g.get_max_degree())
 	print(g.eulerian_path())
 	print((g.all_paths('A', 'G')))
+	print(g.connected_components())
 
 	# g = Graph("list")
 	# m = Graph("matrix")
