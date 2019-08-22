@@ -45,6 +45,27 @@ class Graph:
 	def __len__(self):
 		return len(self.get_vertices())
 
+	def predecessor_subgraph(self, v):
+		"""
+		return the predecessor subgraph formed by doing a bfs
+		of the graph starting at vertex v
+		"""
+		visited = {v:True}
+
+		subgraph = Graph()
+		subgraph.add_vertex(v)
+		q = [v]
+
+		while (q):
+			node = q.pop(0)
+			for nbr in filter(lambda x: x not in visited, self.get_neighbors(node)):
+				subgraph.add_vertex(nbr)
+				subgraph.set_edge(node, nbr, self.get_edge(node, nbr))
+				visited[nbr] = True
+				q.append(nbr)
+		return subgraph
+
+
 
 	def contains_cycle(self):
 		seen = {} # all nodes that we have visited
@@ -72,56 +93,100 @@ class Graph:
 				return True
 		return False
 
+	def __floyd_warshall(self):
+		pass
 
-	def shortest_path(self, v1, v2, algo="dijkstra"):
+	def __bellman_ford(self, v):
+		"""
+		relax all the edges in the graph
+		len(graph) times. this ensures that d[v]
+		is the shortest path from s to v because
+		of the path relaxation property.
+		"""
+
+		vertex_info = {}
+		for vtx in self.get_vertices():
+			vertex_info[vtx] = float('inf')
+		vertex_info[v] = 0
+
+		def relax(u, v, w):
+			print(u, v, w)
+			if (vertex_info[u] + w < vertex_info[v]):
+				return vertex_info[u] + w
+			else:
+				return vertex_info[v]
+
+
+		for _ in range(len(self) - 1):
+			new_dists = {}
+			for e in self.get_edges():
+				new_dists[e[1]] = relax(e[0], e[1], e[2])
+
+			for k, v in new_dists.items():
+				vertex_info[k] = v
+
+		shortest_paths = {}
+		for e in self.get_edges():
+			print(e)
+			if (vertex_info[e[0]] + e[2] < vertex_info[e[1]]):
+				raise Exception("graph contains a negative weight cycle")
+			shortest_paths[e[1]] = vertex_info[e[1]]
+		return shortest_paths
+
+
+
+	def __dijkstra(self, v1, v2):
+		class Vertex:
+			def __init__(self, data, parent=None, dist=float('inf')):
+				self.data = data
+				self.parent = parent
+				self.dist = dist
+
+		pq = DHeap(has_priority=lambda x, y: x.dist < y.dist)
+		pq.insert(Vertex(v1, dist=0))
+		explored = {}
+		while (len(pq) > 0):
+			curr = pq.remove_min()
+			if (curr.data == v2):
+				break
+			if (curr.data in explored):
+				continue
+			explored[curr.data] = True
+			for nbr in self.get_neighbors(curr.data):
+				if (not nbr in explored):
+					pq.insert(Vertex(nbr, curr, curr.dist + self.get_edge(curr.data, nbr)))
+		return curr.dist
+
+	def shortest_path(self, v1, v2):
+		"""
+		find the shortest path between v1 and v2
+		"""
 		if (not self.contains_vertex(v1)):
 			raise Exception("v1 must exist")
 
 		if (not self.connected(v1, v2)):
 			raise Exception("there is no path between v1 and v2")
-		
 
-		def dijkstra(v1, v2):
-
-			class Vertex:
-				def __init__(self, data, parent=None, dist=float('inf')):
-					self.data = data
-					self.parent = parent
-					self.dist = dist
-
-			pq = DHeap(has_priority=lambda x, y: x.dist < y.dist)
-			pq.insert(Vertex(v1, dist=0))
-			explored = {}
-			while (len(pq) > 0):
-				curr = pq.remove_min()
-				if (curr.data == v2):
-					break
-				if (curr.data in explored):
-					continue
-				explored[curr.data] = True
-				for nbr in self.get_neighbors(curr.data):
-					if (not nbr in explored):
-						pq.insert(Vertex(nbr, curr, curr.dist + self.get_edge(curr.data, nbr)))
-			return curr.dist
-
-
-
-		def bellman_ford(v1, v2):
-			pass
-
-		def floyd_warshall(v1, v2):
-			pass
-
-		if (algo == "dijkstra"):
-			if (list(filter(lambda x: x[2] < 0, self.get_edges())) != []):
-				raise Exception("Cannot perform Dijkjstra's on graph with negative weights")
-			return dijkstra(v1, v2)
-		elif (algo == "bellman-ford"):
-			return bellman_ford(v1, v2)
-		elif (algo == "floyd-warshall"):
-			return floyd_warshall(v1, v2)
+		if (list(filter(lambda x: x[2] < 0, self.get_edges())) != []):
+			x = self.shortest_path(v1)
+			return x[x.index(v2)]
 		else:
-			raise Exception("invalid algo argument")
+			return self.__dijkstra(v1, v2)
+
+	def shortest_path(self, v):
+		"""
+		find the shortest paths from v to eavh vertex in the graph
+		"""
+		if (not self.contains_vertex(v)):
+			raise Exception("v must exist")
+		return self.__bellman_ford(v)
+
+	def shortest_paths(self):
+		"""
+		find the shortest paths between all pairs of vertices
+		"""
+		return self.__floyd_warshall()
+
 
 	def dfs(self, v):
 		if (not self.contains_vertex(v)):
@@ -230,6 +295,9 @@ class Graph:
 
 		return visit(v1)
 
+	def is_bipartite(self):
+		pass
+
 	def eulerian_path(self):
 		# return an eulerian path if it exists, otherwise None
 		# visit each edge exactly once
@@ -283,14 +351,14 @@ class Graph:
 
 if __name__ == "__main__":
 	g = Graph("list")
-	vs = list(range(1, 7))
-	es = [(1, 2, 100), (2, 4, 1), (4, 6, 30), (1, 3, 3), (3, 5, 5), (5, 6, 2), (4, 5, 27)]
+	vs = list(range(1, 3))
+	es = [(1, 2, -1), (2, 1, -1)]
 	for v in vs:
 		g.add_vertex(v)
 	for e in es:
 		g.set_edge(e[0], e[1], e[2])
 
-	print(g.shortest_path(1, 6))
+	print(g.shortest_path(1))
 
 	# g = Graph("list")
 	# m = Graph("matrix")
