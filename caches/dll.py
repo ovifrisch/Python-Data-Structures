@@ -94,6 +94,7 @@ class DLL:
          self.tail.next = node
          self.tail += 1
       self.size += 1
+      return node
 
    def pop_front(self):
       if (not self.head):
