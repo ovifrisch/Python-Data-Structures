@@ -1,5 +1,6 @@
 from adj_list import Adjacency_List
 from adj_matrix import Adjacency_Matrix
+from d_heap import DHeap
 
 class Graph:
 	def __init__(self, impl="list"):
@@ -73,16 +74,54 @@ class Graph:
 
 
 	def shortest_path(self, v1, v2, algo="dijkstra"):
+		if (not self.contains_vertex(v1)):
+			raise Exception("v1 must exist")
+
+		if (not self.connected(v1, v2)):
+			raise Exception("there is no path between v1 and v2")
 		
 
-		def dikjstra(v1, v2):
-			pass
+		def dijkstra(v1, v2):
+
+			class Vertex:
+				def __init__(self, data, parent=None, dist=float('inf')):
+					self.data = data
+					self.parent = parent
+					self.dist = dist
+
+			pq = DHeap(has_priority=lambda x, y: x.dist < y.dist)
+			pq.insert(Vertex(v1, dist=0))
+			explored = {}
+			while (len(pq) > 0):
+				curr = pq.remove_min()
+				if (curr.data == v2):
+					break
+				if (curr.data in explored):
+					continue
+				explored[curr.data] = True
+				for nbr in self.get_neighbors(curr.data):
+					if (not nbr in explored):
+						pq.insert(Vertex(nbr, curr, curr.dist + self.get_edge(curr.data, nbr)))
+			return curr.dist
+
+
 
 		def bellman_ford(v1, v2):
 			pass
 
 		def floyd_warshall(v1, v2):
 			pass
+
+		if (algo == "dijkstra"):
+			if (list(filter(lambda x: x[2] < 0, self.get_edges())) != []):
+				raise Exception("Cannot perform Dijkjstra's on graph with negative weights")
+			return dijkstra(v1, v2)
+		elif (algo == "bellman-ford"):
+			return bellman_ford(v1, v2)
+		elif (algo == "floyd-warshall"):
+			return floyd_warshall(v1, v2)
+		else:
+			raise Exception("invalid algo argument")
 
 	def dfs(self, v):
 		if (not self.contains_vertex(v)):
@@ -175,8 +214,21 @@ class Graph:
 			pass
 
 	def connected(self, v1, v2):
-		# is v1 connected to v2 by a series of edges?
-		pass
+		if (not self.contains_vertex(v1)):
+			raise Exception("v1 must exist")
+		visited = {v1:True}
+
+		def visit(node):
+			nonlocal visited, v2
+			if (node == v2):
+				return True
+			for nbr in filter(lambda x: x not in visited, self.get_neighbors(node)):
+				visited[nbr] = True
+				if (visit(nbr)):
+					return True
+			return False
+
+		return visit(v1)
 
 	def eulerian_path(self):
 		# return an eulerian path if it exists, otherwise None
@@ -231,14 +283,14 @@ class Graph:
 
 if __name__ == "__main__":
 	g = Graph("list")
-	vs = list(range(1, 6))
-	es = [(1, 2), (3, 2), (2, 4), (3, 5)]
+	vs = list(range(1, 7))
+	es = [(1, 2, 100), (2, 4, 1), (4, 6, 30), (1, 3, 3), (3, 5, 5), (5, 6, 2), (4, 5, 27)]
 	for v in vs:
 		g.add_vertex(v)
 	for e in es:
-		g.set_edge(e[0], e[1], 1)
+		g.set_edge(e[0], e[1], e[2])
 
-	print(g.topological_sort())
+	print(g.shortest_path(1, 6))
 
 	# g = Graph("list")
 	# m = Graph("matrix")
