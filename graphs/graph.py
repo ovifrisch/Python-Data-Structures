@@ -1,6 +1,7 @@
 from adj_list import Adjacency_List
 from adj_matrix import Adjacency_Matrix
 from d_heap import DHeap
+import itertools
 
 class Graph:
 	def __init__(self, impl="list"):
@@ -315,17 +316,53 @@ class Graph:
 
 		return visit(v1)
 
+	def verify_eulerian_path(self, path):
+		"""
+		verify that the given path is an eulerian path
+		the path is a series of edges
+		"""
+		if (len(path) != len(self.get_edges()) + 1):
+			return False
+
+		if (path[0] != path[-1]):
+			return False
+
+		edges = [x[:2] for x in self.get_edges()]
+		seen = {}
+		for i in range(0, len(path) - 1):
+			this_edge = (path[i], path[i+1])
+			if (this_edge not in edges):
+				return False
+			if (this_edge in seen):
+				return False
+			seen[this_edge] = True
+		return True
+
 	def is_bipartite(self):
 		pass
 
 	def eulerian_path(self):
-		# return an eulerian path if it exists, otherwise None
-		# visit each edge exactly once
-		pass
+		for path in list(itertools.permutations(self.get_vertices())):
+			path = list(path) + [path[0]]
+			if (self.verify_eulerian_path(path)):
+				return path
+		return None
+
+	def verify_hamiltonian_path(self, path):
+		if (set(path) != set(self.get_vertices())):
+			return False
+
+		edges = [x[:2] for x in self.get_edges()]
+		for i in range(0, len(path) - 1):
+			if ((path[i], path[i+1]) not in edges):
+				return False
+		return True
 
 	def hamiltonian_path(self):
-		# visit each vertex exactly once
-		pass
+		for path in list(itertools.permutations(self.get_vertices())):
+			if (self.verify_hamiltonian_path(path)):
+				return path
+		return None
 
 	def all_paths(self, v1, v2):
 		# get all unique paths from v1 to v2
@@ -394,7 +431,7 @@ class Graph:
 if __name__ == "__main__":
 	g = Graph("list")
 	vs = ['A', 'B', 'C', 'D']
-	es = [('A', 'B', 5), ('A', 'D', 2), ('D', 'C', 3), ('B', 'C', -5)]
+	es = [('A', 'B', 5), ('C', 'D', 3), ('B', 'C', -5), ('D', 'A', 1)]
 	for v in vs:
 		g.add_vertex(v)
 	for e in es:
@@ -403,6 +440,7 @@ if __name__ == "__main__":
 	# print(g.shortest_path('A', 'C'))
 	print(g.get_min_degree())
 	print(g.get_max_degree())
+	print(g.eulerian_path())
 
 	# g = Graph("list")
 	# m = Graph("matrix")
