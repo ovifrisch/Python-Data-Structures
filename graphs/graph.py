@@ -349,13 +349,35 @@ class Graph:
 		pass
 
 	def get_degree(self, v):
-		pass
+		if (not self.contains_vertex(v)):
+			raise Exception("v does not exist")
+
+		count = 0
+		for vtx in self.get_vertices():
+			for nbr in self.get_neighbors(vtx):
+				if (nbr == v):
+					count += 1
+		return count
 
 	def get_min_degree(self):
-		pass
+		degrees = self.get_all_degrees()
+		return min([degrees[k] for k in degrees.keys()])
+
+
+	def get_all_degrees(self):
+		degrees = {}
+		for v in self.get_vertices():
+			degrees[v] = 0
+
+		for v in self.get_vertices():
+			for nbr in self.get_neighbors(v):
+				degrees[nbr] += 1
+		return degrees
+
 
 	def get_max_degree(self):
-		pass
+		degrees = self.get_all_degrees()
+		return max([degrees[k] for k in degrees.keys()])
 
 	def critical_path_analysis(self):
 		pass
@@ -378,7 +400,9 @@ if __name__ == "__main__":
 	for e in es:
 		g.set_edge(e[0], e[1], e[2])
 
-	print(g.shortest_path('A', 'C'))
+	# print(g.shortest_path('A', 'C'))
+	print(g.get_min_degree())
+	print(g.get_max_degree())
 
 	# g = Graph("list")
 	# m = Graph("matrix")
