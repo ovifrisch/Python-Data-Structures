@@ -66,7 +66,6 @@ class Graph:
 		return subgraph
 
 
-
 	def contains_cycle(self):
 		seen = {} # all nodes that we have visited
 		for v in self.get_vertices():
@@ -96,6 +95,11 @@ class Graph:
 	def __floyd_warshall(self):
 		pass
 
+	def __relax(self, u, v, w):
+		if (u + w < v):
+			return u + w
+		return v
+
 	def __bellman_ford(self, v):
 		"""
 		relax all the edges in the graph
@@ -104,34 +108,19 @@ class Graph:
 		of the path relaxation property.
 		"""
 
-		vertex_info = {}
+		vertex_dists = {}
 		for vtx in self.get_vertices():
-			vertex_info[vtx] = float('inf')
-		vertex_info[v] = 0
-
-		def relax(u, v, w):
-			print(u, v, w)
-			if (vertex_info[u] + w < vertex_info[v]):
-				return vertex_info[u] + w
-			else:
-				return vertex_info[v]
-
+			vertex_dists[vtx] = float('inf')
+		vertex_dists[v] = 0
 
 		for _ in range(len(self) - 1):
-			new_dists = {}
 			for e in self.get_edges():
-				new_dists[e[1]] = relax(e[0], e[1], e[2])
+				vertex_dists[e[1]] = self.__relax(vertex_dists[e[0]], vertex_dists[e[1]], e[2])
 
-			for k, v in new_dists.items():
-				vertex_info[k] = v
-
-		shortest_paths = {}
 		for e in self.get_edges():
-			print(e)
-			if (vertex_info[e[0]] + e[2] < vertex_info[e[1]]):
+			if (vertex_dists[e[0]] + e[2] < vertex_dists[e[1]]):
 				raise Exception("graph contains a negative weight cycle")
-			shortest_paths[e[1]] = vertex_info[e[1]]
-		return shortest_paths
+		return vertex_dists
 
 
 
@@ -157,6 +146,23 @@ class Graph:
 					pq.insert(Vertex(nbr, curr, curr.dist + self.get_edge(curr.data, nbr)))
 		return curr.dist
 
+
+	def topological_shortest_path(self, v):
+		"""
+		relax edges in topological order
+		"""
+		shortest_paths = {}
+		for vtx in self.get_vertices():
+			shortest_paths[vtx] = float('inf')
+		shortest_paths[v] = 0
+		vs = self.topological_sort()
+		for v in vs:
+			for nbr in self.get_neighbors(v):
+				shortest_paths[nbr] = self.__relax(shortest_paths[v], shortest_paths[nbr], self.get_edge(v, nbr))
+		return shortest_paths
+
+
+
 	def shortest_path(self, v1, v2):
 		"""
 		find the shortest path between v1 and v2
@@ -167,13 +173,19 @@ class Graph:
 		if (not self.connected(v1, v2)):
 			raise Exception("there is no path between v1 and v2")
 
+		# if the graph is a DAG, use the topological ordering to get an O(V + E) algorithm
+		if (not self.contains_cycle()):
+			return self.topological_shortest_path(v1)[v2]
+
+		# if the graph contains negative edge weights, do bellman ford
 		if (list(filter(lambda x: x[2] < 0, self.get_edges())) != []):
-			x = self.shortest_path(v1)
-			return x[x.index(v2)]
+			shortest_paths = self.single_source_shortest_paths(v1)
+			return shortest_paths[v2]
 		else:
+			# otherwise dijkstra
 			return self.__dijkstra(v1, v2)
 
-	def shortest_path(self, v):
+	def single_source_shortest_paths(self, v):
 		"""
 		find the shortest paths from v to eavh vertex in the graph
 		"""
@@ -250,6 +262,14 @@ class Graph:
 				return k
 		return None
 
+
+	"""
+	can be improved by pre-computing indegrees of each vertex
+	and placing them in a queue. For every vertex popped off
+	the queue, we lower the indegrees of each of its neighbors.
+	If the neighbor's indegree is 0 as a result of this update,
+	it is appended to the queue. (a stack could also be used)
+	"""
 	def topological_sort(self):
 		if (self.contains_cycle()):
 			raise Exception("Cannot perform topological_sort on a cyclic graph")
@@ -351,14 +371,14 @@ class Graph:
 
 if __name__ == "__main__":
 	g = Graph("list")
-	vs = list(range(1, 3))
-	es = [(1, 2, -1), (2, 1, -1)]
+	vs = ['A', 'B', 'C', 'D']
+	es = [('A', 'B', 5), ('A', 'D', 2), ('D', 'C', 3), ('B', 'C', -5)]
 	for v in vs:
 		g.add_vertex(v)
 	for e in es:
 		g.set_edge(e[0], e[1], e[2])
 
-	print(g.shortest_path(1))
+	print(g.shortest_path('A', 'C'))
 
 	# g = Graph("list")
 	# m = Graph("matrix")
