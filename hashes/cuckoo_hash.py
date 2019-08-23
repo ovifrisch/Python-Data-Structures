@@ -14,12 +14,21 @@ class CuckooHash:
 			array = [None] * self.ts
 			hash_function = self.get_hash_function(self.ts)
 			self.tables.append({'array':array, 'hf':hash_function, 'size':0})
-		self.table_start = 0
 		"""
 		array: the underlying array
 		hf: the hash function that maps keys in this array
 		size: the array's size
 		"""
+
+
+		# when you are rehasing a table, you want to reinsert the items
+		# starting at that table's index for better performance and
+		# balancing of data across tables. so when you rehash a table,
+		# set this value to the table's index. the __setitem__ method
+		# will look at it and order the table permutations such that
+		# all permutations that start with this index come before the
+		# ones that dont
+		self.table_start = 0
 
 
 	def __getitem__(self, key):
@@ -99,7 +108,20 @@ class CuckooHash:
 	and then re-inserting all items
 	"""
 	def __rehash(self):
-		raise Exception("not yet implemented")
+		tables_cpy = copy.deepcopy(self.tables)
+		for i in range(len(self.tables)):
+			arr = [None] * (len(tables_cpy[i]['array']) * 2)
+			hf = self.get_hash_function(len(arr))
+			self.tables[i] = {'array':arr, 'hf':hf, 'size':0}
+
+		old_table_start = self.table_start
+		for i in range(len(self.tables)):
+			self.table_start = i
+			for items in tables_cpy[i]['array']:
+				if (items):
+					for item in items:
+						self[item['key']] = item['val']
+		self.table_start = old_table_start
 
 	"""
 	double the table size for table i, recompute its hash
@@ -107,7 +129,7 @@ class CuckooHash:
 	"""
 	def __rehash_table(self, i):
 		table_cpy = copy.deepcopy(self.tables[i])
-		arr = [None] * len(table_cpy['array']) * 2
+		arr = [None] * (len(table_cpy['array']) * 2)
 		hf = self.get_hash_function(len(arr))
 		self.tables[i] = {'array':arr, 'hf':hf, 'size':0}
 		old_table_start = self.table_start
