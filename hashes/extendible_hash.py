@@ -25,12 +25,49 @@ class Trie:
 		self.M = M
 		self.root = self.Node(data_ptr=Leaf(self.M))
 
+	def increase_directory_size(self, by=1):
+
+		def add_levels(self, root, by):
+			if (by == 0):
+				return
+			root.left = self.Node()
+			root.right = self.Node()
+			add_levels(root.left, by - 1)
+			add_levels(root.right, by - 1)
+
+
+
+		def helper(self, root):
+			if (root.data_ptr):
+				add_levels(root, by)
+				return
+			helper(root.left)
+			helper(root.right)
+
 
 class Leaf:
 	def __init__(self, M=4, depth=0):
-		self.M = 4
-		self.depth = 0
+		self.M = M
+		self.depth = depth
 		self.items = []
+		self.min_agreements = float('inf')
+
+	"""
+	starting from depth past LSB, return the number of consecutive bits that
+	are the same in hash1 and hash2
+	"""
+	def num_agreements(self, hash1, hash2):
+		shift = count = self.depth
+
+		def agree(bit1, bit2):
+			return (bit1 and bit2) or (not bit1 and not bit2)
+
+		while (1):
+			if (agree((hash1 >> shift) & 1, ((hash2 >> shift) & 1))):
+				count += 1
+				shift += 1
+			else:
+				return count
 
 	def contains(self, key):
 		return key in [x['key'] for x in self.items]
@@ -48,8 +85,13 @@ class Leaf:
 	def __len__(self):
 		return len(self.items)
 
-	def add(self, key, val):
-		self.items.append({'key':key, 'val':val})
+	def add(self, key, val, hashed):
+		self.items.append({'key':key, 'val':val, 'hash':hashed})
+
+		if (len(self) == 1):
+			return
+		else:
+			self.min_agreements = min(self.min_agreements, self.num_agreements(hashed, self.items[0]['hash']))
 
 
 """
@@ -65,19 +107,21 @@ class ExtendibleHash:
 		self.depth = 0
 
 	def __setitem__(self, key, val):
+		hashed = self.hash(key)
 		leaf = self.get_leaf(key)
 
 		if (leaf.contains(key)):
 			leaf[key] = val
 			return
 
+		leaf.add(key, val, hashed)
+
 		if (len(leaf) < self.M):
-			leaf.add(key, val)
 			return
 
 		# the leaf is at its capacity
 		pass
-		print("hey")
+		print(leaf.min_agreements)
 
 	def get_leaf(self, key):
 		hashed = self.hash(key)
@@ -131,8 +175,8 @@ class ExtendibleHash:
 
 if __name__ == "__main__":
 	h = ExtendibleHash()
-	h[0] = 1
-	h[1] = 2
+	h[3] = 1
+	h[11] = 12
 
 
 
