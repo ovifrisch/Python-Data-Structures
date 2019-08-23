@@ -210,7 +210,28 @@ class CuckooHash:
 		return self.__find() is not None
 
 	def __repr__(self):
-		pass
+		res = "{"
+		for table in self.tables:
+			for items in table['array']:
+				if (items):
+					for item in items:
+						key = item['key']
+						val = item['val']
+						if (isinstance(key, int)):
+							res += str(key)
+						else:
+							res += "'" + str(key) + "'"
+						res += ": "
+
+						if (isinstance(val, int)):
+							res += str(val)
+						else:
+							res += "'" + str(val) + "'"
+						res += ", "
+		if (len(res) > 1):
+			res = res[:-2]
+		res += "}"
+		return res
 
 	def __len__(self):
 		return self.size
@@ -219,10 +240,12 @@ class CuckooHash:
 
 if __name__ == "__main__":
 	h = CuckooHash()
-	h["ovi"] = 2
-	h["dan"] = 3
-	h["x"] = 4
-	print(h["ovi"])
-	print(h["x"])
+	h["foot"] = 2
+	h["bart"] = 3
+	h["kart"] = 4
+	h["kart"] = 3
+	print(h["foot"])
+	print(h["kart"])
+	print(h)
 
 
