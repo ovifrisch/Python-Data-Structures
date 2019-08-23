@@ -58,7 +58,7 @@ Look up only takes 2 disk accesses
 """
 class ExtendibleHash:
 
-	def __init__(self, M=4):
+	def __init__(self, M=1):
 		self.size = 0
 		self.M = M # the maximum number of elements for a leaf
 		self.directory = Trie(M)
@@ -77,6 +77,7 @@ class ExtendibleHash:
 
 		# the leaf is at its capacity
 		pass
+		print("hey")
 
 	def get_leaf(self, key):
 		hashed = self.hash(key)
@@ -131,8 +132,7 @@ class ExtendibleHash:
 if __name__ == "__main__":
 	h = ExtendibleHash()
 	h[0] = 1
-	print(h[0])
-
+	h[1] = 2
 
 
 

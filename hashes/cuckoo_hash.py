@@ -7,8 +7,8 @@ class CuckooHash:
 		self.size = 0
 		self.num_tables = num_tables
 		self.items_per_cell = items_per_cell
-		self.ts = init_ts
-		self.load_factor = load_factor
+		self.ts = init_ts # initial table size
+		self.load_factor = load_factor # ratio of full cells
 		self.tables = []
 		for i in range(self.num_tables):
 			array = [None] * self.ts

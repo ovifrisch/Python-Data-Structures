@@ -1,6 +1,3 @@
-caches/lfu
-caches/lru
-hashes/cuckoo_hash
 hashes/extendible_hash
 heaps/fibonacci_heap
 heaps/pairing_heap

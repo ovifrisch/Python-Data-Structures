@@ -22,3 +22,6 @@ trees/mst
 heaps/leftist_heap
 heaps/skew_heap
 heaps/binomial_queue
+caches/lfu
+caches/lru
+hashes/cuckoo_hash
