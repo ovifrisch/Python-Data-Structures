@@ -44,6 +44,17 @@ class Trie:
 			helper(root.left)
 			helper(root.right)
 
+	"""
+	update the trie by adding "by" levels and updating the data pointers
+	"""
+	def update(self, right_leaf, left_leaf, hashed, by):
+		"""
+		if you get to a leaf that matches the hash up to that point,
+
+		"""
+		pass
+
+
 
 class Leaf:
 	def __init__(self, M=4, depth=0):
@@ -51,6 +62,9 @@ class Leaf:
 		self.depth = depth
 		self.items = []
 		self.min_agreements = float('inf')
+
+	def bits_required(self):
+		return self.depth + self.min_agreements + 1
 
 	"""
 	starting from depth past LSB, return the number of consecutive bits that
@@ -71,6 +85,21 @@ class Leaf:
 
 	def contains(self, key):
 		return key in [x['key'] for x in self.items]
+
+	def split(self):
+
+		right_leaf = Leaf(M=self.M, depth=self.depth + self.min_agreements + 1)
+		left_leaf = Leaf(M=self.M, depth=self.depth + self.min_agreements + 1)
+
+		shift = self.depth + self.min_agreements
+		for item in self.items:
+			hsh = item['hash']
+			if ((hsh >> shift) & 1 == 1):
+				right_leaf.add(item['key'], item['val'], hsh)
+			else:
+				left_leaf.add(item['key'], item['val'], hsh)
+
+		return right_leaf, left_leaf
 
 	def __setitem__(self, key, val):
 		for item in self.items:
@@ -116,12 +145,16 @@ class ExtendibleHash:
 
 		leaf.add(key, val, hashed)
 
-		if (len(leaf) < self.M):
+		if (len(leaf) <= self.M):
 			return
 
 		# the leaf is at its capacity
-		pass
-		print(leaf.min_agreements)
+		bits_required = leaf.bits_required()
+		right_leaf, left_leaf = leaf.split()
+		self.directory.update(right_leaf, left_leaf, hashed, bits_required - self.depth)
+		self.depth = max(self.depth, bits_required)
+
+
 
 	def get_leaf(self, key):
 		hashed = self.hash(key)
