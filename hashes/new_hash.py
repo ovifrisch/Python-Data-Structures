@@ -91,7 +91,7 @@ class ExtendibleHash:
 		self.size = 0
 		self.M = M # the maximum number of elements for a leaf
 		self.directory = [Leaf()]
-		self.rand_big_num = random.randint(0, 10000000) # for hashing
+		self.rand_big_num = random.getrandbits(128) # for hashing
 
 	def hash(self, key):
 		key = str(key)
@@ -100,8 +100,11 @@ class ExtendibleHash:
 			for c in s:
 				res += ord(c)
 			return res
+
 		return sum_chars(key) * self.rand_big_num
 
+	def depth(self):
+		return int(math.log(len(self.directory), 2))
 
 	def contains(self, key):
 		hashed_key = self.hash(key)
@@ -118,12 +121,8 @@ class ExtendibleHash:
 	def set_bit(self, num, pos, val):
 		return self.clear_bit(num, pos) | (val << pos)
 
+		
 	def reverse_bits(self, num, offset):
-		"""
-		reverse the bits of num starting at offset
-		ex: 111111000100, 3 => 111111000001
-		"""
-
 		start = 0
 		end = offset
 		while (start < end):
@@ -135,14 +134,10 @@ class ExtendibleHash:
 		return num
 
 
-	def depth(self):
-		return int(math.log(len(self.directory), 2))
-
 	def leaf_idx(self, hashed_key):
 		depth = self.depth()
 		reversed_hash = self.reverse_bits(hashed_key, depth - 1)
 		return reversed_hash & ((1 << depth) - 1)
-
 
 	"""
 	Update the directory as a result of a leaf going over capacity.
@@ -205,15 +200,18 @@ class ExtendibleHash:
 			leaf[key] = val
 			return
 
+		# preemptively insert the item
 		leaf.add(key, val, hashed_key)
 
+		# if leaf not over capacity, we are done
 		if (len(leaf) <= self.M):
 			self.size += 1
 			return
 
-		# the leaf is at its capacity
+		# else we need to split the leaf
 		right_leaf, left_leaf = leaf.split()
 
+		# and update the directory
 		self.update_directory(right_leaf, left_leaf, hashed_key)
 		self.size += 1
 
@@ -258,25 +256,32 @@ class ExtendibleHash:
 	def pop(self, key):
 		hashed_key = self.hash(key)
 		if (not self.contains(key)):
-			raise Exception("Key Error: {}".format(key))
-
+			raise Exception("Key Error: ".format(key))
 		self.directory[self.leaf_idx(hashed_key)].remove(key)
 		self.size -= 1
 
 
 if __name__ == "__main__":
-	h = ExtendibleHash(M=1)
+	h = ExtendibleHash(M=1
+		)
 	h[0] = 1
 	h[1] = 1
 	h[3] = 1
 	h[2] = 1
 	h[11] = 1
-	h.pop(11)
-	# h.pop(0)
-	# h[0] = 1
-	# print(len(h))
+	# h.pop(11)
+	h.pop(0)
+	h[0] = 1
+	print(len(h))
 
 	for i in range(len(h.directory)):
 		print(h.directory[i].items, h.directory[i].depth)
 
 	print(h)
+
+
+
+
+
+
+
