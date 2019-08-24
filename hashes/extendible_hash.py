@@ -1,59 +1,5 @@
-
-# from trie import Trie
-
-
-# class MyTrie(Trie):
-# 	def __init__(self):
-# 		Trie.__init__(self)
-
-# 	class Node(Trie.Node):
-# 		def __init__(self):
-
-
-class Trie:
-
-	class Node:
-		def __init__(self, left=None, right=None, data_ptr=None):
-			self.left = left
-			self.right = right
-			self.data_ptr = data_ptr
-
-		def is_leaf(self):
-			return self.data_ptr is not None
-
-	def __init__(self, M):
-		self.M = M
-		self.root = self.Node(data_ptr=Leaf(self.M))
-
-	def increase_directory_size(self, by=1):
-
-		def add_levels(self, root, by):
-			if (by == 0):
-				return
-			root.left = self.Node()
-			root.right = self.Node()
-			add_levels(root.left, by - 1)
-			add_levels(root.right, by - 1)
-
-
-
-		def helper(self, root):
-			if (root.data_ptr):
-				add_levels(root, by)
-				return
-			helper(root.left)
-			helper(root.right)
-
-	"""
-	update the trie by adding "by" levels and updating the data pointers
-	"""
-	def update(self, right_leaf, left_leaf, hashed, by):
-		"""
-		if you get to a leaf that matches the hash up to that point,
-
-		"""
-		pass
-
+import math
+import copy
 
 
 class Leaf:
@@ -71,7 +17,8 @@ class Leaf:
 	are the same in hash1 and hash2
 	"""
 	def num_agreements(self, hash1, hash2):
-		shift = count = self.depth
+		shift = self.depth
+		count = 0
 
 		def agree(bit1, bit2):
 			return (bit1 and bit2) or (not bit1 and not bit2)
@@ -92,6 +39,8 @@ class Leaf:
 		left_leaf = Leaf(M=self.M, depth=self.depth + self.min_agreements + 1)
 
 		shift = self.depth + self.min_agreements
+
+
 		for item in self.items:
 			hsh = item['hash']
 			if ((hsh >> shift) & 1 == 1):
@@ -132,18 +81,90 @@ class ExtendibleHash:
 	def __init__(self, M=1):
 		self.size = 0
 		self.M = M # the maximum number of elements for a leaf
-		self.directory = Trie(M)
-		self.depth = 0
+		self.directory = [Leaf()]
+
+	def hash(self, key):
+		return key
+
+
+	def contains(self, key):
+		hashed_key = self.hash(key)
+		return self.get_leaf(hashed_key).contains(key)
+
+	def get_bit(self, num, pos):
+		mask = 1 << pos
+		return num & mask != 0
+
+	def clear_bit(self, num, pos):
+		mask = ~(1 << pos)
+		return num & mask
+
+	def set_bit(self, num, pos, val):
+		return self.clear_bit(num, pos) | (val << pos)
+
+	def reverse_bits(self, num, offset):
+		"""
+		reverse the bits of num starting at offset
+		ex: 111111000100, 3 => 111111000001
+		"""
+
+		start = 0
+		end = offset
+		while (start < end):
+			temp = self.get_bit(num, start)
+			num = self.set_bit(num, start, self.get_bit(num, end))
+			num = self.set_bit(num, end, temp)
+			start += 1
+			end -= 1
+		return num
+
+	def get_leaf(self, hashed_key):
+		depth = int(math.log(len(self.directory), 2))
+		idx = self.reverse_bits(hashed_key, depth - 1) & ((1 << depth) - 1)
+		return self.directory[idx]
+
+	def get_bucket(self, hashed_key):
+		depth = int(math.log(len(self.directory), 2))
+		idx = self.reverse_bits(hashed_key, depth - 1) & ((1 << depth) - 1)
+		return idx
+
+
+	def update_directory(self, right_leaf, left_leaf, hashed_key, bits_required):
+		old_directory = copy.deepcopy(self.directory)
+		old_bucket = self.get_bucket(hashed_key)
+
+		increase_by = bits_required - (len(self.directory) - 1)
+		step_size = int(pow(2, max(0, increase_by)))
+
+		self.directory = [None] * len(self.directory) * step_size
+		new_bucket_left = self.get_bucket(left_leaf.items[0]['hash'])
+		new_bucket_right = self.get_bucket(right_leaf.items[0]['hash'])
+		self.directory[new_bucket_left] = left_leaf
+		self.directory[new_bucket_right] = right_leaf
+
+		for i in range(len(self.directory)):
+			if (i == new_bucket_left or i == new_bucket_right):
+				continue
+
+			# empty leaf
+			if (i >= old_bucket * step_size and i < old_bucket * step_size + step_size):
+				self.directory[i] = Leaf(self.M)
+				continue
+
+			old_idx = math.floor(i / step_size)
+			self.directory[i] = old_directory[old_idx]
+
+
 
 	def __setitem__(self, key, val):
-		hashed = self.hash(key)
+		hashed_key = self.hash(key)
 		leaf = self.get_leaf(key)
 
 		if (leaf.contains(key)):
 			leaf[key] = val
 			return
 
-		leaf.add(key, val, hashed)
+		leaf.add(key, val, hashed_key)
 
 		if (len(leaf) <= self.M):
 			return
@@ -151,68 +172,33 @@ class ExtendibleHash:
 		# the leaf is at its capacity
 		bits_required = leaf.bits_required()
 		right_leaf, left_leaf = leaf.split()
-		self.directory.update(right_leaf, left_leaf, hashed, bits_required - self.depth)
-		self.depth = max(self.depth, bits_required)
 
-
-
-	def get_leaf(self, key):
-		hashed = self.hash(key)
-		depth = 0
-
-		# find the trie leaf
-		def helper(root):
-			nonlocal key, depth
-			if (root.is_leaf()):
-				return root.data_ptr
-
-			# go right
-			if ((hashed >> depth) & root.bit):
-				root = root.right
-			else:
-				root = root.left
-			depth += 1
-			return helper(root)
-
-		return helper(self.directory.root)
+		self.update_directory(right_leaf, left_leaf, hashed_key, bits_required)
 
 
 	def __getitem__(self, key):
-		leaf = self.get_leaf(key)
+		hashed_key = self.hash(key)
+		leaf = self.get_leaf(hashed_key)
 		if (not leaf.contains(key)):
 			raise Exception("Key Error")
 		return leaf[key]
 
-	def __repr__(self):
-		pass
-
 	def __len__(self):
 		return self.size
-
-
-	"""
-	just return the key for now. assuming the keys
-	are all unique integers
-	"""
-	def hash(self, key):
-		return key
-
-	def contains(self, key):
-		return self.get_leaf(key).contains(key)
-
 
 	def pop(self, key):
 		pass
 
 
-
 if __name__ == "__main__":
 	h = ExtendibleHash()
+	h[0] = 1
+	h[1] = 1
 	h[3] = 1
-	h[11] = 12
+	h[2] = 1
 
-
-
+	for i in range(len(h.directory)):
+		print(h.directory[i].items, h.directory[i].depth, h.directory[i].min_agreements)
 
 
 
