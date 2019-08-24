@@ -133,7 +133,9 @@ class ExtendibleHash:
 		old_directory = copy.deepcopy(self.directory)
 		old_bucket = self.get_bucket(hashed_key)
 
-		increase_by = bits_required - (len(self.directory) - 1)
+		depth = int(math.log(len(self.directory), 2))
+
+		increase_by = bits_required - depth
 		step_size = int(pow(2, max(0, increase_by)))
 
 		self.directory = [None] * len(self.directory) * step_size
@@ -196,6 +198,7 @@ if __name__ == "__main__":
 	h[1] = 1
 	h[3] = 1
 	h[2] = 1
+	h[11] = 1
 
 	for i in range(len(h.directory)):
 		print(h.directory[i].items, h.directory[i].depth, h.directory[i].min_agreements)
