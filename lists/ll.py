@@ -1,4 +1,4 @@
-
+import random
 """
 Linked List implementation with an
 Interface like a Python List
@@ -77,6 +77,78 @@ class LinkedList:
 	"""
 	def insert_sorted(self, data):
 		pass
+
+
+
+	def quicksort(self):
+
+		def helper(start, end):
+			if (start == end):
+				return start
+
+			curr = start
+			pivot = start.data
+			pivot_node = start
+
+			while (curr.next != end):
+				if (curr.next.data < pivot):
+					temp1 = curr.next
+					curr.next = curr.next.next
+					temp2 = start
+					start = temp1
+					start.next = temp2
+				else:
+					curr = curr.next
+
+			start = helper(start, pivot_node)
+			pivot_node.next = helper(pivot_node.next, end)
+			return start
+
+		self.head = helper(self.head, None)
+
+
+	"""
+	merge the list in place
+	# 4 -> 6 -> 2 -> 1
+
+	4. -> 6 -> 2. -> 1
+
+	"""
+	def mergesort(self):
+
+		def merge(node1, node2):
+			if (not node1):
+				return node2
+			if (not node2):
+				return node1
+			if (node1.data < node2.data):
+				node = node1
+				node.next = merge(node1.next, node2)
+			else:
+				node = node2
+				node.next = merge(node1, node2.next)
+			return node
+
+
+		def helper(node):
+			if (node is None or node.next is None):
+				return node
+
+			prev_slow = None
+			slow = node
+			fast = node
+			# 1 -> 2
+			while (fast is not None and fast.next is not None):
+				prev_slow = slow
+				slow = slow.next
+				fast = fast.next.next
+
+			prev_slow.next = None
+
+			return merge(helper(node), helper(slow))
+
+		self.head = helper(self.head)
+
 
 	"""
 	insert data at the given position
@@ -231,7 +303,15 @@ class LinkedList:
 
 
 if __name__ == "__main__":
-	x = LinkedList([1, 2, 3, 4])
+	lis = []
+	for i in range(15):
+		lis.append(random.randint(1, 100))
+
+
+	x = LinkedList(lis)
+	# x.mergesort()
+	x.quicksort()
+	print(x)
 
 
 
