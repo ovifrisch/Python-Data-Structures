@@ -230,6 +230,39 @@ class LinkedList:
 		self.size = 0
 
 	"""
+	get the Nth node from the back of the list
+	(1 pass without prior knowledge of list's size)
+	"""
+	def nthNodeFromBack(self, N):
+		p1 = self.head
+
+		for i in range(N):
+			if (not p1):
+				raise Exception("List is smaller than {}".format(N))
+			p1 += 1
+
+		p2 = self.head
+		while (p1 is not None):
+			p1 += 1
+			p2 += 1
+		return p2.data
+
+
+	def has_cycle(self):
+		fast = self.head
+		slow = self.head
+		if (fast is None):
+			return False
+		fast = fast.next
+
+		while (fast != None and fast.next != None):
+			if (fast == slow):
+				return True
+			fast = fast.next.next
+			slow = slow.next
+		return False
+
+	"""
 	the number of instances of data in the list
 	"""
 	def count(self, data):
@@ -305,15 +338,10 @@ class LinkedList:
 if __name__ == "__main__":
 	lis = []
 	for i in range(15):
-		lis.append(random.randint(1, 100))
+		lis.append(i)
 
 
 	x = LinkedList(lis)
-	# x.mergesort()
-	x.quicksort()
-	print(x)
-
-
 
 
 
