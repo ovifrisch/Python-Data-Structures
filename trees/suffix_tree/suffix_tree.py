@@ -38,8 +38,10 @@ class SuffixTree:
         if len(strings) + len(self.strings) > len(self.termination_symbols):
             raise Exception("Tree at Capacity")
 
-        if (sum(map(lambda x: sum(map(lambda y: y in self.termination_symbols, x)) != 0, strings)) > 0):
-            raise Exception("Illegal Character")
+        for string in strings:
+            for c in string:
+                if (c in self.termination_symbols):
+                    raise Exception("Illegal Character")
 
         self.strings += strings
         for string in strings:
