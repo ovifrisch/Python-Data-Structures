@@ -1,12 +1,23 @@
-import re
-
 """Expression Tree"""
 
+
+
+def get_valid_chars():
+    """Returns the set of valid chars in an expression string"""
+    lower = set(map(lambda x: chr(x), range(ord('a'), ord('z') + 1)))
+    upper = set(map(lambda x: chr(x), range(ord('A'), ord('Z') + 1)))
+    nums = set(map(lambda x: chr(x), range(ord('1'), ord('9') + 1)))
+    ops = set(['*', '/', '-', '+', '&', '|', '!'])
+    misc = set(['(', ')', '.', ' '])
+    return lower.union(upper).union(nums).union(ops).union(misc)
+
 class ExpressionTree:
+    # pylint: disable=too-many-instance-attributes
     """ Expression tree for binary or boolean expressons"""
 
 
     class TreeNode:
+        # pylint: disable=too-few-public-methods
         """ A node in the Expression Tree"""
 
         def __init__(self, left, right):
@@ -15,16 +26,20 @@ class ExpressionTree:
 
 
     class OperandNode(TreeNode):
+        # pylint: disable=too-few-public-methods
         """An operand node in the Expression Tree"""
 
         def __init__(self, outer, operand, left=None, right=None):
+            # pylint: disable=super-init-not-called
             outer.TreeNode.__init__(self, left, right)
             self.operand = operand
 
     class OperatorNode(TreeNode):
+        # pylint: disable=too-few-public-methods
         """An operator node in the Expression Tree"""
 
         def __init__(self, outer, operator, left=None, right=None):
+            # pylint: disable=super-init-not-called
             outer.TreeNode.__init__(self, left, right)
             self.operator = operator
 
@@ -39,12 +54,16 @@ class ExpressionTree:
             Invalid fix: The fix paramter was provided but was not one of the allowed values.
             Invalid expr: The expr parameter is invalid
         """
+        self.valid_fixes = ["infix", "prefix", "postfix"]
+        self.valid_chars = get_valid_chars()
+        self.expr_type = None
+        self.root = None
         self.num_ops = {
-                "*": lambda x, y: x*y,
-                "/": lambda x, y: x/y,
-                "+": lambda x, y: x+y,
-                "-": lambda x, y: x-y
-            }
+            "*": lambda x, y: x*y,
+            "/": lambda x, y: x/y,
+            "+": lambda x, y: x+y,
+            "-": lambda x, y: x-y
+        }
 
         self.bool_ops = {
             "&": lambda x, y: x and y,
@@ -57,9 +76,20 @@ class ExpressionTree:
 
 
     def __init_tree(self, fix, expr):
+        """Validates the expression string and if all is good, constructs the tree
+
+        Args:
+            fix: the format of expr
+            expr: the expression string
+
+        Raises:
+            Invalid Expression: Raised when the expression given its fix is invalid
+        """
         self.variables = set()
         self.__validate_fix(fix)
         self.__set_expr_type(expr)
+        if sum(map(lambda x: x not in self.valid_chars, expr)) > 0:
+            raise Exception("Invalid Expression")
         tokens = self.__tokenize(expr)
         for var in filter(lambda x: isinstance(x, str), tokens):
             self.variables.add(var)
@@ -75,7 +105,7 @@ class ExpressionTree:
         return self.bool_ops[token]
 
 
-    def __tokenize(self, expr):
+    def __tokenize(self, expression):
         """Tokenizes the expression into operands and operators
 
         Args:
@@ -84,52 +114,54 @@ class ExpressionTree:
         Returns:
             A list of tokens
         """
+
+
+        # pylint: disable=too-many-branches
         res = []
-        expr_parts = expr.split() # split on whitespace
+        expr_parts = expression.split() # split on whitespace
         for expr in expr_parts:
             curr_num = None
             curr_var = None
-            for i in range(len(expr)):
-
-                if (expr[i] == '(' or expr[i] == ')'):
-                    if (curr_num is not None):
-                        res.append(int(curr_num))
+            for char in expr:
+                if char in (')', '('):
+                    if curr_num is not None:
+                        res.append(float(curr_num))
                         curr_num = None
 
-                    if (curr_var is not None):
+                    if curr_var is not None:
                         res.append(curr_var)
                         curr_var = None
 
-                    res.append(expr[i])
+                    res.append(char)
                     continue
 
-                if (self.__is_op(expr[i])):
-                    if (curr_num is not None):
-                        res.append(int(curr_num))
+                if self.__is_op(char):
+                    if curr_num is not None:
+                        res.append(float(curr_num))
                         curr_num = None
 
-                    if (curr_var is not None):
+                    if curr_var is not None:
                         res.append(curr_var)
                         curr_var = None
 
-                    res.append(expr[i])
+                    res.append(char)
 
-                elif (expr[i].isdigit()):
-                    if (curr_num is None):
-                        curr_num = expr[i]
+                elif (char.isdigit() or char == '.'):
+                    if curr_num is None:
+                        curr_num = char
                     else:
-                        curr_num += expr[i]
+                        curr_num += char
 
                 else:
-                    if (curr_var is None):
-                        curr_var = expr[i]
+                    if curr_var is None:
+                        curr_var = char
                     else:
-                        curr_var += expr[i]
+                        curr_var += char
 
-            if (curr_num is not None):
-                res.append(int(curr_num))
+            if curr_num is not None:
+                res.append(float(curr_num))
 
-            if (curr_var is not None):
+            if curr_var is not None:
                 res.append(curr_var)
         return res
 
@@ -141,44 +173,50 @@ class ExpressionTree:
         Returns: A boolean in case of a Boolean Expression Tree, Float otherwise
         """
 
-        if (not self.root):
+        if not self.root:
             raise Exception("Empty Expression")
 
         def helper(node):
-            if (isinstance(node, self.OperandNode)):
+            if not node:
+                return None
+            if isinstance(node, self.OperandNode):
                 if (isinstance(node.operand, str) and node.operand in self.assignments):
                     return self.assignments[node.operand]
                 return node.operand
-            else:
-                left = helper(node.left)
-                right = helper(node.right)
+            left = helper(node.left)
+            right = helper(node.right)
 
-                if (isinstance(left, str) or isinstance(right, str)):
-                    return str(left) + node.operator + str(right)
-                else:
-                    return self.__op(node.operator)(left, right)
+            if not right:
+                if isinstance(left, str):
+                    return "(" + node.operator + " " + left + ")"
+                return left
 
-        return helper(self.root)
+            if (isinstance(left, str) or isinstance(right, str)):
+                return "(" + str(left) + " " + node.operator + " " + str(right) + ")"
+            return self.__op(node.operator)(left, right)
+
+        res = helper(self.root)
+        if (isinstance(res, str) and res[0] == '('):
+            res = res[1:-1]
+        return res
 
 
     def __validate_fix(self, fix):
-        if (fix != "infix" and fix != "postfix" and fix != "prefix"):
+        if fix not in self.valid_fixes:
             raise Exception("Invalid fix")
 
     def __set_expr_type(self, expr):
 
-        def xx(ops):
+        def op_in(ops):
             return map(lambda op: op in expr, ops)
 
-        if (sum(xx(self.num_ops)) > 0 and sum(xx(self.bool_ops)) > 0):
-            raise Exception("Cannot combine boolean and numeric operators")
+        if (sum(op_in(self.num_ops)) > 0 and sum(op_in(self.bool_ops)) > 0):
+            raise Exception("Invalid Expression")
 
-        if (sum(xx(self.num_ops)) > 0):
+        if sum(op_in(self.num_ops)) > 0:
             self.expr_type = "numeric"
-        elif (sum(xx(self.bool_ops)) > 0):
+        elif sum(op_in(self.bool_ops)) > 0:
             self.expr_type = "boolean"
-        else:
-            self.expr_type = None
 
     def set_expr(self, expr, fix="infix"):
         """Sets the expression to expr"""
@@ -194,14 +232,14 @@ class ExpressionTree:
             Nonexistent variable: One of the keys in assignments is not a variable.
             Invalid value: One of the values is invalid
         """
-        for k, v in assignments.items():
-            if (k not in self.variables):
+        for key, val in assignments.items():
+            if key not in self.variables:
                 raise Exception("Nonexistent variable")
 
-            if (self.expr_type == "numeric" and not isinstance(v, int)):
+            if (self.expr_type == "numeric" and not isinstance(val, int)):
                 raise Exception("Invalid value")
 
-            if (self.expr_type == "boolean" and not isinstance(v, bool)):
+            if (self.expr_type == "boolean" and not isinstance(val, bool)):
                 raise Exception("Invalid value")
 
         self.assignments = assignments
@@ -211,24 +249,29 @@ class ExpressionTree:
 
         def construct_prefix(tokens):
             """Constructs the expression tree from a prefix expression"""
-
+            # pylint: disable=unused-argument
             def helper():
                 nonlocal tokens
-                if (not tokens):
+                if not tokens:
                     return None
 
                 tok = tokens[0]
                 tokens = tokens[1:]
 
-                if (self.__is_op(tok)):
+                if self.__is_op(tok):
                     node = self.OperatorNode(self, tok)
                 else:
                     node = self.OperandNode(self, tok)
                     return node # operand's cannot have children
 
+                if not tokens:
+                    raise Exception("Invalid Expression")
+
                 node.left = helper()
 
-                if (not tokens):
+                if not tokens:
+                    if node.operator != "!":
+                        raise Exception("Invalid Expression")
                     return node
 
                 node.right = helper()
@@ -249,29 +292,30 @@ class ExpressionTree:
     def __infix2prefix(self, tokens):
         """Convert an infix expresion to prefix"""
 
-        def f(x):
-            if (x == "("):
+        def flip_paren(char):
+            if char == "(":
                 return ")"
-            elif (x == ')'):
+            if char == ')':
                 return "("
-            return x
+            return char
 
         tokens.reverse()
-        tokens = list(map(lambda x: f(x), tokens))
+        tokens = [flip_paren(x) for x in tokens]
         tokens = self.__infix2postfix(tokens)
         tokens.reverse()
+        print(tokens)
         return tokens
 
     def __postfix2prefix(self, tokens):
         """Convert a postfix expression to prefix"""
         stack = []
         for token in tokens:
-            if (not self.__is_op(token)):
+            if not self.__is_op(token):
                 stack.append([token])
             else:
-                xx = [token] + stack[-2] + stack[-1]
+                new_top = [token] + stack[-2] + stack[-1]
                 stack = stack[:-2]
-                stack.append(xx)
+                stack.append(new_top)
         return stack[0]
 
 
@@ -280,28 +324,29 @@ class ExpressionTree:
         stack = []
         res = []
         for token in tokens:
-            if (token == '('):
+            if token == '(':
                 stack.append('(')
             elif (not self.__is_op(token) and token != ')'):
                 res.append(token)
             else:
-                if (self.__is_op(token)):
+                if self.__is_op(token):
                     if (not stack or stack[-1] == '('):
                         stack.append(token)
-                    elif (self.prec.index(token) < self.prec.index(stack[-1])):
+                    elif self.prec.index(token) < self.prec.index(stack[-1]):
                         stack.append(token)
                     else:
-                        while (stack and stack[-1] != '(' and self.prec.index(stack[-1]) < self.prec.index(token)):
+                        while (stack and stack[-1] != '(' and
+                               self.prec.index(stack[-1]) < self.prec.index(token)):
                             res.append(stack.pop(-1))
                         stack.append(token)
-                elif (token == ")"):
-                    while (stack[-1] != "("):
+                elif token == ")":
+                    while stack[-1] != "(":
                         res.append(stack.pop(-1))
                     stack.pop(-1)
-        while (stack):
-            el = stack.pop(-1)
-            if el != '(':
-                res.append(el)
+        while stack:
+            top = stack.pop(-1)
+            if top != '(':
+                res.append(top)
         return res
 
 
@@ -319,10 +364,10 @@ class ExpressionTree:
         """
 
         def inorder(node):
-            if (not node):
+            if not node:
                 return ""
 
-            if (isinstance(node, self.OperandNode)):
+            if isinstance(node, self.OperandNode):
                 return str(node.operand)
 
             left = inorder(node.left)
@@ -331,10 +376,10 @@ class ExpressionTree:
             return "(" + left + str(node.operator) + right + ")"
 
         def postorder(node):
-            if (not node):
+            if not node:
                 return ""
 
-            if (isinstance(node, self.OperandNode)):
+            if isinstance(node, self.OperandNode):
                 return str(node.operand)
 
             left = postorder(node.left)
@@ -342,34 +387,21 @@ class ExpressionTree:
             return left + " " + right + " " + node.operator
 
         def preorder(node):
-            if (not node):
+            if not node:
                 return ""
 
-            if (isinstance(node, self.OperandNode)):
+            if isinstance(node, self.OperandNode):
                 return str(node.operand)
 
             left = preorder(node.left)
             right = preorder(node.right)
             return node.operator + ' ' + left + ' ' + right
 
-        if (fix == "infix"):
+        if fix == "infix":
             return inorder(self.root)
 
-        elif (fix == "postfix"):
+        if fix == "postfix":
             return postorder(self.root)
 
-        elif (fix == "prefix"):
+        if fix == "prefix":
             return preorder(self.root)
-
-
-
-if __name__ == "__main__":
-    e = ExpressionTree("**2 3 4", "prefix")
-    # e.assign_vars({
-    #     'a':7,
-    #     'b':3,
-    #     'c':98
-    # })
-    print(e.to_str("prefix"))
-
-

@@ -34,10 +34,10 @@ class TestInfixEval(unittest.TestCase):
         self.assertTrue('Empty Expression' in str(context.exception))
 
 
-    # def test1(self):
-    #     expr = "a + b"
-    #     res = self.get_res(expr)
-    #     self.assertEqual(res, expr)
+    def test1(self):
+        expr = "a + b"
+        res = self.get_res(expr)
+        self.assertEqual(res, expr)
 
     def test2(self):
         expr = "a + b"
@@ -45,16 +45,16 @@ class TestInfixEval(unittest.TestCase):
         result = self.get_res(expr, assigns)
         self.assertEqual(result, 22)
 
-    # def test3(self):
-    #     expr = "+"
-    #     with self.assertRaises(Exception) as context:
-    #         self.tree.set_expr(expr)
-    #     self.assertTrue('Invalid Expression' in str(context.exception))
+    def test3(self):
+        expr = "+"
+        with self.assertRaises(Exception) as context:
+            self.tree.set_expr(expr)
+        self.assertTrue('Invalid Expression' in str(context.exception))
 
-    # def test4(self):
-    #     expr = "((water + eggs) * bacon) / sausage"
-    #     res = self.get_res(expr)
-    #     self.assertEqual(res, expr.replace(" ", ""))
+    def test4(self):
+        expr = "((water + eggs) * bacon) / sausage"
+        res = self.get_res(expr)
+        self.assertEqual(res, expr)
 
     def test5(self):
         expr = "((water + eggs) * bacon) / sausage"
@@ -68,29 +68,29 @@ class TestInfixEval(unittest.TestCase):
         self.assertEqual(res, 15)
 
 
-    # def test6(self):
-    #     expr = "(3 -* 7) + 2"
-    #     with self.assertRaises(Exception) as context:
-    #         self.tree.set_expr(expr)
-    #     self.assertTrue('Invalid Expression' in str(context.exception))
+    def test6(self):
+        expr = "(3 -* 7) + 2"
+        with self.assertRaises(Exception) as context:
+            self.tree.set_expr(expr)
+        self.assertTrue('Invalid Expression' in str(context.exception))
 
-    # def test7(self):
-    #     expr = "((A & B) | C) & !D"
-    #     assigns = {
-    #         'A': True,
-    #         'B': False,
-    #         'C': True,
-    #         'D': False
-    #     }
-    #     res = self.get_res(expr, assigns)
-    #     self.assertEqual(res, True)
+    def test7(self):
+        expr = "((A & B) | C) & !D"
+        assigns = {
+            'A': True,
+            'B': False,
+            'C': True,
+            'D': False
+        }
+        res = self.get_res(expr, assigns)
+        self.assertEqual(res, True)
 
 
     def test8(self):
         expr = "2 + 3 & True"
         with self.assertRaises(Exception) as context:
             self.tree.set_expr(expr)
-        self.assertTrue('Cannot combine boolean and numeric operators' in str(context.exception))
+        self.assertTrue('Invalid Expression' in str(context.exception))
 
 
 
