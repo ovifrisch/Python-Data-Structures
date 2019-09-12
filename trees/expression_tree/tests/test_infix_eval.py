@@ -28,7 +28,7 @@ class TestInfixEval(unittest.TestCase):
         return self.tree.evaluate()
 
     def test_empty(self):
-        self.tree.set_expr(expr_str="", fix="infix")
+        self.tree.set_expr(expr="", fix="infix")
         with self.assertRaises(Exception) as context:
             self.tree.evaluate()
         self.assertTrue('Empty Expression' in str(context.exception))
@@ -39,11 +39,11 @@ class TestInfixEval(unittest.TestCase):
     #     res = self.get_res(expr)
     #     self.assertEqual(res, expr)
 
-    # def test2(self):
-    #     expr = "a + b"
-    #     assigns = {'a': 3, 'b':19}
-    #     result = self.get_res(expr, assigns)
-    #     self.assertEqual(result, 22)
+    def test2(self):
+        expr = "a + b"
+        assigns = {'a': 3, 'b':19}
+        result = self.get_res(expr, assigns)
+        self.assertEqual(result, 22)
 
     # def test3(self):
     #     expr = "+"
@@ -54,18 +54,18 @@ class TestInfixEval(unittest.TestCase):
     # def test4(self):
     #     expr = "((water + eggs) * bacon) / sausage"
     #     res = self.get_res(expr)
-    #     self.assertEqual(res, expr)
+    #     self.assertEqual(res, expr.replace(" ", ""))
 
-    # def test5(self):
-    #     expr = "((water + eggs) * bacon) / sausage"
-    #     assigns = {
-    #         'water': 7,
-    #         'eggs': 3,
-    #         'bacon': 3,
-    #         'sausage': 2
-    #     }
-    #     res = self.get_res(expr)
-    #     self.assertEqual(res, 15)
+    def test5(self):
+        expr = "((water + eggs) * bacon) / sausage"
+        assigns = {
+            'water': 7,
+            'eggs': 3,
+            'bacon': 3,
+            'sausage': 2
+        }
+        res = self.get_res(expr, assigns)
+        self.assertEqual(res, 15)
 
 
     # def test6(self):

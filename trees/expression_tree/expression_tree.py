@@ -53,13 +53,14 @@ class ExpressionTree:
         }
         self.assignments = {}
         self.__init_tree(fix, expr)
+        self.prec = ['*', '/', '+', '-', '!', '&', '|']
 
 
     def __init_tree(self, fix, expr):
+        self.variables = set()
         self.__validate_fix(fix)
         self.__set_expr_type(expr)
         tokens = self.__tokenize(expr)
-        self.variables = set()
         for var in filter(lambda x: isinstance(x, str), tokens):
             self.variables.add(var)
         self.__construct(tokens, fix)
@@ -238,20 +239,70 @@ class ExpressionTree:
 
 
         if fix == "infix":
-            self.root = construct_postfix(self.__infix2prefix(tokens))
+            self.root = construct_prefix(self.__infix2prefix(tokens))
         elif fix == "postfix":
-            self.root = construct_postfix(self.__postfix2prefix(tokens))
-        else: # postfix
-            self.root = construct_postfix(tokens)
+            self.root = construct_prefix(self.__postfix2prefix(tokens))
+        else: # prefix
+            self.root = construct_prefix(tokens)
 
 
-    def __infix2prefix(tokens):
+    def __infix2prefix(self, tokens):
         """Convert an infix expresion to prefix"""
-        pass
 
-    def __postfix2prefix(tokens):
+        def f(x):
+            if (x == "("):
+                return ")"
+            elif (x == ')'):
+                return "("
+            return x
+
+        tokens.reverse()
+        tokens = list(map(lambda x: f(x), tokens))
+        tokens = self.__infix2postfix(tokens)
+        tokens.reverse()
+        return tokens
+
+    def __postfix2prefix(self, tokens):
         """Convert a postfix expression to prefix"""
-        pass
+        stack = []
+        for token in tokens:
+            if (not self.__is_op(token)):
+                stack.append([token])
+            else:
+                xx = [token] + stack[-2] + stack[-1]
+                stack = stack[:-2]
+                stack.append(xx)
+        return stack[0]
+
+
+    def __infix2postfix(self, tokens):
+        """Convert an infix expression to postfix"""
+        stack = []
+        res = []
+        for token in tokens:
+            if (token == '('):
+                stack.append('(')
+            elif (not self.__is_op(token) and token != ')'):
+                res.append(token)
+            else:
+                if (self.__is_op(token)):
+                    if (not stack or stack[-1] == '('):
+                        stack.append(token)
+                    elif (self.prec.index(token) < self.prec.index(stack[-1])):
+                        stack.append(token)
+                    else:
+                        while (stack and stack[-1] != '(' and self.prec.index(stack[-1]) < self.prec.index(token)):
+                            res.append(stack.pop(-1))
+                        stack.append(token)
+                elif (token == ")"):
+                    while (stack[-1] != "("):
+                        res.append(stack.pop(-1))
+                    stack.pop(-1)
+        while (stack):
+            el = stack.pop(-1)
+            if el != '(':
+                res.append(el)
+        return res
 
 
     def to_str(self, fix="infix"):
