@@ -1,6 +1,16 @@
 """Suffix Tree Implementation"""
 
 
+class TreeNode:
+
+    def __init__(self, substr, children=None):
+        self.substr = substr
+        if not children:
+            self.children = []
+        else:
+            self.children = children
+
+
 class SuffixTree:
     """Suffix Tree class
 
@@ -14,7 +24,7 @@ class SuffixTree:
 
     def __init__(self):
         """Init"""
-        self.root = None
+        self.root = TreeNode("")
         self.termination_symbols = ['$', '@', '%', '&', '*', '~', '!', '+', '#', '^']
         self.strings = []
 
@@ -43,10 +53,18 @@ class SuffixTree:
                 if (c in self.termination_symbols):
                     raise Exception("Illegal Character")
 
-        self.strings += strings
+        suffixes = self.get_suffixes(strings)
+        for suffix in suffixes:
+            self.__add_string(suffix)
+
+
+    def get_suffixes(self, strings):
+        res = []
         for string in strings:
-            self.__add_string(string)
-            self.strings += [string]
+            sym = self.termination_symbols[len(self.strings)]
+            res += [string[i:] + sym for i in range(len(string) + 1)]
+            self.strings.append(string)
+        return sorted(res, key=lambda x: len(x))
 
     def get_strings(self):
         """Get all the strings in the suffix tree
@@ -70,13 +88,54 @@ class SuffixTree:
         """
         pass
 
+    def __longest_common_prefix(self, str1, str2):
+        idx = 0
+        while (idx < len(str1) and idx < len(str2) and str1[idx] == str2[idx]):
+            idx += 1
+        return idx
+
+
+
     def __add_string(self, string):
         """Add the string to the tree
 
         Args:
             string: the string to add
         """
-        term_symb = self.termination_symbols[len(self.strings)]
+
+        def helper(node, str_):
+            if (not str_):
+                return
+
+            start_chars = [x[0] for x in [y.substr for y in node.children]]
+            if str_[0] not in start_chars:
+                node.children.append(TreeNode(str_))
+                return
+
+            child_idx = start_chars.index(str_[0])
+            new_substr_len = self.__longest_common_prefix(str_, node.children[child_idx].substr)
+            node.children[child_idx].substr = node.children[child_idx].substr[new_substr_len:]
+            new_node = TreeNode(str_[:new_substr_len], [node.children[child_idx]])
+            node.children.pop(child_idx)
+            node.children.append(new_node)
+            helper(node.children[-1], str_[new_substr_len:])
+
+        helper(self.root, string)
+
+    def get_suffixes_from_tree(self):
+
+        result = []
+        def helper(node, curr_str):
+            if (node.substr and node.substr[-1] in self.termination_symbols):
+                result.append(curr_str + node.substr)
+
+            for child in node.children:
+                helper(child, curr_str + node.substr)
+
+        helper(self.root, "")
+        return result
+
+
 
     def longest_repeated_substring(self, str_=None):
         """Computers the LRS of each string in the tree
@@ -107,6 +166,11 @@ class SuffixTree:
             String Not Found: If str_ is provided but does not exist in the tree
         """
         pass
+
+
+if __name__ == "__main__":
+    t = SuffixTree()
+    t.add_strings([""])
 
 
 

@@ -18,7 +18,7 @@ class TestSuffixTree(unittest.TestCase):
 
 
     def test_add_strings1(self):
-        strings = ["banana, heater, healer", "barns", "flag", ""]
+        strings = ["banana", "heater", "healer", "barns", "flag", ""]
         self.tree.add_strings(strings)
         strings = ["a", "b", "c", "d", "e"]
         with self.assertRaises(Exception) as context:
