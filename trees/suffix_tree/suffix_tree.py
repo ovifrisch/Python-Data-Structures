@@ -205,6 +205,66 @@ class SuffixTree:
         Raises:
             String Not Found: If str_ is provided but does not exist in the tree
         """
+        strings = self.strings
+        if (str_):
+            if (str_ not in strings):
+                raise Exception("String Not Found")
+            strings = [str_]
+
+
+        def single_string(string):
+            symb = self.termination_symbols[self.strings.index(string)]
+            """
+            Observation: If a substring is repeated in string,
+            then it is an internal node in the suffix tree.
+
+            Observation 2: If a substribng is the longest
+            repeated in a string, it is the "deepest" internal
+            node in the string.
+
+            When we find an internal node, we must only include it
+            as a candidate if one of its children ends in the target
+            termination symbol.
+            """
+            max_repeat = ""
+            def helper(node, curr_str):
+                nonlocal max_repeat
+
+                if (node.substr and node.substr[-1] in self.termination_symbols):
+                    if (node.substr[-1] == symb):
+                        return True
+                    return False
+
+                curr_str += node.substr
+                is_str = []
+                for child in node.children:
+                    is_str.append(helper(child, curr_str))
+                if (sum(is_str) > 1):
+                    if (len(curr_str) > len(max_repeat)):
+                        max_repeat = curr_str
+
+                return sum(is_str) > 1
+
+            helper(self.root, "")
+            return max_repeat
+
+
+        res = []
+        for string in strings:
+            res.append(single_string(string))
+
+        if (str_):
+            return res[0]
+        return res
+                
+
+
+
+
+
+
+
+
         pass
 
     def longest_palindrome(self, str_=None):

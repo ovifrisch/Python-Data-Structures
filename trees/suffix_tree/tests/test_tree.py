@@ -65,23 +65,30 @@ class TestSuffixTree(unittest.TestCase):
         self.assertEqual(res, "")
 
 
-    # def test_longest_repeated_substring1(self):
-    #     strings = ["abab"]
-    #     self.add_strings(strings)
-    #     res = self.tree.longest_repeated_substring("abab")
-    #     self.assertEqual(res, "ab")
+    def test_longest_repeated_substring1(self):
+        strings = ["abab"]
+        self.tree.add_strings(strings)
+        res = self.tree.longest_repeated_substring("abab")
+        self.assertEqual(res, "ab")
 
-    # def test_longest_repeated_substring2(self):
-    #     strings = ["xxabcdabcdlp", "xoxoxoxo"]
-    #     self.add_strings(strings)
-    #     res = self.tree.longest_repeated_substring()
-    #     self.assertEqual(res, ["abcd", "xoxo"])
+    def test_longest_repeated_substring2(self):
+        strings = ["xxabcdabcdlp", "xoxoxoxo"]
+        self.tree.add_strings(strings)
+        res = self.tree.longest_repeated_substring()
+        self.assertEqual(res, ["abcd", "xoxoxo"])
 
-    # def test_longest_repeated_substring3(self):
-    #     strings = ["abcdef", "fedcba"]
-    #     self.add_strings(strings)
-    #     res = self.tree.longest_repeated_substring()
-    #     self.assertEqual(res, ["a", "f"])
+    def test_longest_repeated_substring3(self):
+        strings = ["abcdef", "fedcba"]
+        self.tree.add_strings(strings)
+        res = self.tree.longest_repeated_substring()
+        self.assertEqual(res, ["", ""])
+
+
+    def test_longest_repeated_substring4(self):
+        strings = ["nonsense"]
+        self.tree.add_strings(strings)
+        res = self.tree.longest_repeated_substring()
+        self.assertEqual(res, ["nse"])
 
 
     # def test_longest_palindrome1(self):
