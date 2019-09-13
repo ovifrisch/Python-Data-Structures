@@ -10,11 +10,12 @@ class TestSuffixTree(unittest.TestCase):
         super(TestSuffixTree, self).__init__(*args, **kwargs)
         self.tree = SuffixTree()
 
-    def test_get_strings(self):
-        strings = ["banana, heater, healer", "barns", "flag", ""]
-        self.tree.add_strings(strings)
-        res = self.tree.get_strings()
-        self.assertEqual(set(strings), set(res))
+
+    # def test1(self):
+    #     strings = ['a', 'b']
+    #     self.tree.add_strings(strings)
+    #     res = self.tree.get_strings()
+    #     self.assertEqual(set(strings), set(res))
 
 
     def test_add_strings1(self):
@@ -32,30 +33,36 @@ class TestSuffixTree(unittest.TestCase):
             self.tree.add_strings(strings)
         self.assertTrue('Illegal Character' in str(context.exception))
 
-    # def test_longest_common_substring1(self):
-    #     strings = ["xabaxa", "ghabaxi"]
-    #     self.tree.add_strings(strings)
-    #     res = self.tree.longest_common_substring()
-    #     self.assertEqual(res, "abax")
+    def test_longest_common_substring1(self):
+        strings = ['abbb', 'aba']
+        self.tree.add_strings(strings)
+        res = self.tree.longest_common_substring()
+        self.assertEqual(res, 'ab')
 
-    # def test_longest_common_substring2(self):
-    #     strings = ["bad_input"]
-    #     self.tree.add_strings(strings)
-    #     with self.assertRaises(Exception) as context:
-    #         self.tree.longest_common_substring()
-    #     self.assertTrue('Not Enough Strings' in str(context.exception))
+    def test_longest_common_substring2(self):
+        strings = ["xabaxa", "ghabaxi"]
+        self.tree.add_strings(strings)
+        res = self.tree.longest_common_substring()
+        self.assertEqual(res, "abax")
 
-    # def test_longest_common_substring3(self):
-    #     self.tree.add_strings(["same_string, diff_string"])
-    #     self.tree.add_strings(["same_string"])
-    #     res = self.tree.longest_common_substring(["same_string", "same_string"])
-    #     self.assertEqual("res", "same_string")
+    def test_longest_common_substring3(self):
+        strings = ["bad_input"]
+        self.tree.add_strings(strings)
+        with self.assertRaises(Exception) as context:
+            self.tree.longest_common_substring()
+        self.assertTrue('Not Enough Strings' in str(context.exception))
 
-    # def test_longest_common_substring4(self):
-    #     strings = ["abc", "def", "ghi"]
-    #     self.add_strings(strings)
-    #     res = self.tree.longest_common_substring()
-    #     self.assertEqual(res, "")
+    def test_longest_common_substring4(self):
+        self.tree.add_strings(["same_string", "diff_string"])
+        self.tree.add_strings(["same_string"])
+        res = self.tree.longest_common_substring(["same_string", "same_string"])
+        self.assertEqual(res, "same_string")
+
+    def test_longest_common_substring5(self):
+        strings = ["abc", "def", "ghi"]
+        self.tree.add_strings(strings)
+        res = self.tree.longest_common_substring()
+        self.assertEqual(res, "")
 
 
     # def test_longest_repeated_substring1(self):

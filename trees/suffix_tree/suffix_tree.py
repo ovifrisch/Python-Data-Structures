@@ -74,20 +74,6 @@ class SuffixTree:
         """
         return self.strings
 
-    def longest_common_substring(self, strings=None):
-        """Computes the LCS of all the strings in this suffix tree
-
-        Args:
-            strings (optional): The strings to consider in the LCS
-
-        Returns:
-            A string denoting the LCS of all the strings in the tree
-
-        Raises:
-            String Not Found: If strings is provided but at least one of them does not exist
-        """
-        pass
-
     def __longest_common_prefix(self, str1, str2):
         idx = 0
         while (idx < len(str1) and idx < len(str2) and str1[idx] == str2[idx]):
@@ -104,15 +90,31 @@ class SuffixTree:
         """
 
         def helper(node, str_):
+
             if (not str_):
                 return
 
+            """find the index of the head char"""
             start_chars = [x[0] for x in [y.substr for y in node.children]]
+
+            # if not exists, create a new child and return
             if str_[0] not in start_chars:
                 node.children.append(TreeNode(str_))
                 return
 
+            # the child's index
             child_idx = start_chars.index(str_[0])
+
+
+            # if the child's substr is a prefix of this string, then recurse
+
+            child_substr = node.children[child_idx].substr
+            child_len = len(child_substr)
+            if (child_len < len(str_) and str_[:child_len] == child_substr):
+                helper(node.children[child_idx], str_[child_len:])
+                return
+
+            # find the prefix to preserve
             new_substr_len = self.__longest_common_prefix(str_, node.children[child_idx].substr)
             node.children[child_idx].substr = node.children[child_idx].substr[new_substr_len:]
             new_node = TreeNode(str_[:new_substr_len], [node.children[child_idx]])
@@ -134,6 +136,59 @@ class SuffixTree:
 
         helper(self.root, "")
         return result
+
+
+    def longest_common_substring(self, strings=None):
+        """Computes the LCS of all the strings in this suffix tree
+
+        Args:
+            strings (optional): The strings to consider in the LCS
+
+        Returns:
+            A string denoting the LCS of all the strings in the tree
+
+        Raises:
+            String Not Found: If strings is provided but at least one of them does not exist
+        """
+
+        if (not strings):
+            strings = self.strings
+
+        if (len(list(filter(lambda x: x not in self.strings, strings))) > 0):
+            raise Exception("String Not Found")
+
+        if (len(strings) < 2):
+            raise Exception("Not Enough Strings")
+
+        symbs = set()
+        for string in strings:
+            # find the associated symbol in termination symbols
+            for idx, symb in enumerate(self.strings):
+                if (self.strings[idx] == string and self.termination_symbols[idx] not in symbs):
+                    symbs.add(self.termination_symbols[idx])
+
+        max_str = ""
+
+        def helper(node, curr_str):
+            nonlocal max_str
+            curr_str += node.substr
+            found = set()
+            if (node.substr and node.substr[-1] in symbs):
+                found.add(node.substr[-1])
+
+            for child in node.children:
+                for symb in helper(child, curr_str):
+                    found.add(symb)
+
+            if (set(found) == set(symbs)):
+                if (len(max_str) < len(curr_str)):
+                    max_str = curr_str
+            return found
+
+
+        helper(self.root, "")
+        return max_str
+
 
 
 
@@ -167,10 +222,11 @@ class SuffixTree:
         """
         pass
 
-
 if __name__ == "__main__":
     t = SuffixTree()
-    t.add_strings([""])
+    strings = ["aaa"]
+    t.add_strings(strings)
+    # print(t.contains_null())
 
 
 
