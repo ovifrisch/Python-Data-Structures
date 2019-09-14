@@ -256,16 +256,7 @@ class SuffixTree:
         if (str_):
             return res[0]
         return res
-                
 
-
-
-
-
-
-
-
-        pass
 
     def longest_palindrome(self, str_=None):
         """Computers the longest palindrome of each string in the tree
