@@ -28,6 +28,7 @@ class RangeTree:
             raise Exception("num_dimensions must be an Int")
         self.dims = num_dimensions
         self.root = None
+        self.size = 0
         if data is not None:
             if not isinstance(data, np.ndarray):
                 raise Exception("data must be a numpy array")
@@ -41,8 +42,10 @@ class RangeTree:
 
     def add(self, data):
         """
-        [2, 4, 9]
-        [5, 54, 17]
+        Adds data to the tree
+
+        Args:
+            data: np array (1 row and self.dims cols)
         """
         def add_helper(data, dim, tree):
             if dim == self.dims:
@@ -89,9 +92,48 @@ class RangeTree:
             return tree
 
         self.root = add_helper(data, 0, self.root)
+        self.size += 1
 
     def remove(self, data):
-        pass
+        """
+        Removes data from the tree
+
+        Args:
+            data: np array (1 row and self.dims cols)
+
+        Returns:
+            data if it exists
+
+        Raises:
+            Element does not exist, if data does not exist
+        """
+        if self.contains(data):
+            raise Exception("Element does not exist")
+
+
+
+
+    def contains(self, data):
+        """
+        just do a binary search on the first level
+        """
+
+        def helper(node):
+            if not node:
+                return False
+
+            elif np.array_equal(node.val, data):
+                return True
+
+            elif node.val[0] == data[0]:
+                return helper(node.left) or helper(node.right)
+
+            elif (data[0] < node.val[0]):
+                return helper(node.left)
+
+            return helper(node.right)
+
+        return helper(self.root)
 
 
 

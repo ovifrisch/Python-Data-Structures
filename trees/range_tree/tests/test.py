@@ -47,24 +47,30 @@ class TestRangeTree(unittest.TestCase):
 
         return intervals, (minimum, maximum)
 
-    def test1(self):
+    # def test1(self):
+    #     data = np.array([[5, 54, 17], [2, 4, 9]])
+    #     range_ = (np.array([1, 2, 4]), np.array([10, 53, 100]))
+    #     t = RangeTree(3, data)
+    #     res = t.get_points(range_)
+    #     self.assertTrue(np.array_equal(res, self.contained_in(data, range_)))
+
+
+    # def test2(self):
+    #     dims = 3
+    #     data, range_ = self.random_test_gen(1000, dims, 1, 10)
+    #     # range_ = (np.array([1, 1, 1]), np.array([8, 8, 8]))
+    #     t = RangeTree(dims, data)
+    #     res = t.get_points(range_)
+    #     print(res.shape)
+    #     res = set([tuple(row) for row in res])
+    #     truth = set([tuple(row) for row in self.contained_in(data, range_)])
+    #     self.assertTrue(np.array_equal(res, truth))
+
+
+    def test_contains(self):
         data = np.array([[5, 54, 17], [2, 4, 9]])
-        range_ = (np.array([1, 2, 4]), np.array([10, 53, 100]))
         t = RangeTree(3, data)
-        res = t.get_points(range_)
-        self.assertTrue(np.array_equal(res, self.contained_in(data, range_)))
-
-
-    def test2(self):
-        dims = 3
-        data, range_ = self.random_test_gen(1000, dims, 1, 10)
-        # range_ = (np.array([1, 1, 1]), np.array([8, 8, 8]))
-        t = RangeTree(dims, data)
-        res = t.get_points(range_)
-        print(res.shape)
-        res = set([tuple(row) for row in res])
-        truth = set([tuple(row) for row in self.contained_in(data, range_)])
-        self.assertTrue(np.array_equal(res, truth))
+        self.assertTrue(not t.contains(np.array([5, 54, 7])))
 
 
 if __name__ == "__main__":
