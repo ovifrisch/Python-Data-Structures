@@ -16,7 +16,7 @@ class RangeTree:
     Binary decision rule: >= nodes go right
     """
 
-    def __init__(self, num_dimensions=1, data=None):
+    def __init__(self, data=None):
         """Inits the RangeTree
 
         Args:
@@ -24,21 +24,14 @@ class RangeTree:
             data (optional): numpy matrix of data points 
 
         """
-        if (not isinstance(num_dimensions, int) and num_dimensions <= 1):
-            raise Exception("num_dimensions must be an Int")
-        self.dims = num_dimensions
         self.root = None
         self.size = 0
-        if data is not None:
-            if not isinstance(data, np.ndarray):
-                raise Exception("data must be a numpy array")
-            if (len(data.shape) == 1 and self.dims > 1):
-                raise Exception("Inconsistent dimensions")
-            if (len(data.shape) == 2 and self.dims != data.shape[1]):
-                raise Exception("Inconsistent dimensions")
-
-            # add each row to the tree
-            np.apply_along_axis(self.add, axis=1, arr=data)
+        if len(data.shape) == 1:
+            self.dims = data.shape[0]
+        else:
+            self.dims = data.shape[1]
+        np.apply_along_axis(self.add, axis=1, arr=data)
+            
 
     def add(self, data):
         """
@@ -47,49 +40,41 @@ class RangeTree:
         Args:
             data: np array (1 row and self.dims cols)
         """
-        def add_helper(data, dim, tree):
+        def add_helper(data, dim, node):
+            # base case
             if dim == self.dims:
                 return None
 
-            # empty tree, insert here and recursively insert on empty inner tree
-            if tree is None:
-                tree = TreeNode(data, dim)
-                tree.inner = add_helper(data, dim + 1, None)
-                return tree
+            if not node:
+                tree_node = TreeNode(data, dim)
+                tree_node.inner = add_helper(data, dim + 1, None)
+                return tree_node
 
+            # insert into the inner node because we are adding to the outer's subtree
+            node.inner = add_helper(data, dim + 1, node.inner)
 
-            def binary_search(node):
-                if not node:
-                    tree_node = TreeNode(data, dim)
-                    tree_node.inner = add_helper(data, dim + 1, None)
-                    return tree_node
-
-                # insert into the inner node because we are adding to the outer's subtree
-                node.inner = add_helper(data, dim + 1, node.inner)
-
-                if (not node.left and not node.right):
-                    if data[dim] <= node.val[dim]:
-                        node.left = TreeNode(data, dim)
-                        node.right = TreeNode(node.val, dim)
-                        node.left.inner = add_helper(data, dim + 1, None)
-                        node.right.inner = add_helper(node.val, dim + 1, None)
-                        node.val = data
-                    else:
-                        node.left = TreeNode(node.val, dim)
-                        node.right = TreeNode(data, dim)
-                        node.left.inner = add_helper(node.val, dim + 1, None)
-                        node.right.inner = add_helper(data, dim + 1, None)
-
+            # reached the bottom, make sure that parent node contains max value of left subtree
+            if (not node.left and not node.right):
+                if data[dim] <= node.val[dim]:
+                    node.left = TreeNode(data, dim)
+                    node.right = TreeNode(node.val, dim)
+                    node.left.inner = add_helper(data, dim + 1, None)
+                    node.right.inner = add_helper(node.val, dim + 1, None)
+                    node.val = data
                 else:
-                    if (data[dim] < node.val[dim]):
-                        node.left = binary_search(node.left)
-                    else:
-                        node.right = binary_search(node.right)
+                    node.left = TreeNode(node.val, dim)
+                    node.right = TreeNode(data, dim)
+                    node.left.inner = add_helper(node.val, dim + 1, None)
+                    node.right.inner = add_helper(data, dim + 1, None)
 
-                return node
+            # node has at least 1 child, continue binary search
+            else:
+                if (data[dim] < node.val[dim]):
+                    node.left = add_helper(data, dim, node.left)
+                else:
+                    node.right = add_helper(data, dim, node.right)
 
-            tree = binary_search(tree)
-            return tree
+            return node
 
         self.root = add_helper(data, 0, self.root)
         self.size += 1
@@ -137,7 +122,7 @@ class RangeTree:
 
 
 
-    def get_points(self, range_):
+    def get_points(self, query_range):
         """Get all the points that lie in the given range
 
         Args:
@@ -150,12 +135,13 @@ class RangeTree:
             Wrong Dimension: range dimension is wrong
         """
 
-        # validation code
+        if (query_range[0].shape[0] != self.dims or query_range[1].shape[0] != self.dims):
+            raise Exception("Wrong Dimension")
 
         subtrees = []
 
         def max_traverse(node):
-            maximum = range_[1][node.dim]
+            maximum = query_range[1][node.dim]
             dim_val = node.val[node.dim]
             bottom = node.dim == self.dims - 1
 
@@ -182,7 +168,7 @@ class RangeTree:
                 max_traverse(node.left)
 
         def min_traverse(node):
-            minimum = range_[0][node.dim]
+            minimum = query_range[0][node.dim]
             dim_val = node.val[node.dim]
             bottom = node.dim == self.dims - 1
 
@@ -211,8 +197,8 @@ class RangeTree:
             if not node:
                 return
 
-            minimum = range_[0][node.dim]
-            maximum = range_[1][node.dim]
+            minimum = query_range[0][node.dim]
+            maximum = query_range[1][node.dim]
             dim_val = node.val[node.dim]
 
 
@@ -265,7 +251,7 @@ class RangeTree:
 if __name__ == "__main__":
     data = np.array([[5, 54, 17], [2, 4, 9]])
     range_ = (np.array([1, 2, 4]), np.array([10, 53, 100]))
-    t = RangeTree(3, data)
+    t = RangeTree(data=data)
     res = t.get_points(range_)
     print(res)
 
